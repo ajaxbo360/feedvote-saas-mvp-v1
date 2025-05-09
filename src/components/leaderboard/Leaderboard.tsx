@@ -1,14 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Award, ExternalLink, MessageSquare, Star, ThumbsUp } from 'lucide-react';
@@ -39,11 +32,16 @@ export function Leaderboard({ entries }: LeaderboardProps) {
   const sortedEntries = [...entries].sort((a, b) => {
     const aValue = a[sortField];
     const bValue = b[sortField];
-    
+
+    // Safely handle undefined values (though they shouldn't be undefined based on our schema)
+    if (aValue === undefined && bValue === undefined) return 0;
+    if (aValue === undefined) return sortDirection === 'asc' ? -1 : 1;
+    if (bValue === undefined) return sortDirection === 'asc' ? 1 : -1;
+
     if (sortDirection === 'asc') {
-      return aValue > bValue ? 1 : -1;
+      return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
     } else {
-      return aValue < bValue ? 1 : -1;
+      return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
     }
   });
 
@@ -63,96 +61,80 @@ export function Leaderboard({ entries }: LeaderboardProps) {
 
   return (
     <Card className="w-full">
-      <CardHeader>
+      <CardHeader className="bg-card text-card-foreground">
         <CardTitle className="text-2xl">SaaS Leaderboard</CardTitle>
-        <CardDescription>
+        <CardDescription className="text-muted-foreground">
           Top products ranked by user feedback, testimonials, and engagement
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-muted/30">
             <TableRow>
-              <TableHead className="w-12">Rank</TableHead>
-              <TableHead>Product</TableHead>
-              <TableHead 
-                className="cursor-pointer"
-                onClick={() => handleSort('score')}
-              >
+              <TableHead className="w-12 text-foreground">Rank</TableHead>
+              <TableHead className="text-foreground">Product</TableHead>
+              <TableHead className="cursor-pointer text-foreground" onClick={() => handleSort('score')}>
                 Score {getSortIcon('score')}
               </TableHead>
-              <TableHead 
-                className="cursor-pointer"
-                onClick={() => handleSort('feedbackCount')}
-              >
+              <TableHead className="cursor-pointer text-foreground" onClick={() => handleSort('feedbackCount')}>
                 <div className="flex items-center gap-1">
                   <MessageSquare className="h-4 w-4" />
                   <span>Feedback {getSortIcon('feedbackCount')}</span>
                 </div>
               </TableHead>
-              <TableHead 
-                className="cursor-pointer"
-                onClick={() => handleSort('testimonialCount')}
-              >
+              <TableHead className="cursor-pointer text-foreground" onClick={() => handleSort('testimonialCount')}>
                 <div className="flex items-center gap-1">
                   <Star className="h-4 w-4" />
                   <span>Testimonials {getSortIcon('testimonialCount')}</span>
                 </div>
               </TableHead>
-              <TableHead 
-                className="cursor-pointer"
-                onClick={() => handleSort('badgeCount')}
-              >
+              <TableHead className="cursor-pointer text-foreground" onClick={() => handleSort('badgeCount')}>
                 <div className="flex items-center gap-1">
                   <Award className="h-4 w-4" />
                   <span>Badges {getSortIcon('badgeCount')}</span>
                 </div>
               </TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="text-right text-foreground">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {sortedEntries.map((entry) => (
-              <TableRow key={entry.id}>
-                <TableCell className="font-medium">
+              <TableRow key={entry.id} className="border-b hover:bg-muted/20">
+                <TableCell className="font-medium text-foreground">
                   {entry.rank <= 3 ? (
-                    <Badge className={
-                      entry.rank === 1 
-                        ? "bg-yellow-500" 
-                        : entry.rank === 2 
-                          ? "bg-gray-400" 
-                          : "bg-amber-700"
-                    }>
+                    <Badge
+                      className={
+                        entry.rank === 1
+                          ? 'bg-yellow-500 text-white'
+                          : entry.rank === 2
+                            ? 'bg-gray-500 text-white'
+                            : 'bg-amber-700 text-white'
+                      }
+                    >
                       #{entry.rank}
                     </Badge>
                   ) : (
                     `#${entry.rank}`
                   )}
                 </TableCell>
-                <TableCell>
+                <TableCell className="text-foreground">
                   <div className="flex items-center gap-2">
                     {entry.logoUrl && (
-                      <div className="h-8 w-8 rounded-full overflow-hidden bg-white p-1">
-                        <img 
-                          src={entry.logoUrl} 
-                          alt={entry.productName} 
-                          className="h-full w-full object-contain" 
-                        />
+                      <div className="h-8 w-8 rounded-full overflow-hidden bg-background p-1 border border-border">
+                        <img src={entry.logoUrl} alt={entry.productName} className="h-full w-full object-contain" />
                       </div>
                     )}
                     <span className="font-medium">{entry.productName}</span>
                   </div>
                 </TableCell>
-                <TableCell className="font-bold">{entry.score}</TableCell>
-                <TableCell>{entry.feedbackCount}</TableCell>
-                <TableCell>{entry.testimonialCount}</TableCell>
-                <TableCell>{entry.badgeCount}</TableCell>
+                <TableCell className="font-bold text-foreground">{entry.score}</TableCell>
+                <TableCell className="text-foreground">{entry.feedbackCount}</TableCell>
+                <TableCell className="text-foreground">{entry.testimonialCount}</TableCell>
+                <TableCell className="text-foreground">{entry.badgeCount}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
                     <Button variant="outline" size="sm" asChild>
-                      <Link href={`/products/${entry.productSlug}`}>
-                        View
-                      </Link>
+                      <Link href={`/products/${entry.productSlug}`}>View</Link>
                     </Button>
                     <Button variant="outline" size="sm" asChild>
                       <a href={entry.websiteUrl} target="_blank" rel="noopener noreferrer">

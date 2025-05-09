@@ -194,11 +194,11 @@ export function LeaderboardPopup({ isOpen, onClose }: LeaderboardPopupProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-      <div className="relative w-full max-w-6xl max-h-[90vh] overflow-auto bg-[#0F1720] border border-[#1E2A38] rounded-xl p-6">
+      <div className="relative w-full max-w-6xl max-h-[90vh] overflow-auto bg-background border border-border rounded-xl p-6 shadow-lg">
         <Button
           variant="ghost"
           size="icon"
-          className="absolute top-4 right-4 text-muted-foreground hover:text-white"
+          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
           onClick={onClose}
         >
           <X className="h-5 w-5" />
@@ -209,12 +209,12 @@ export function LeaderboardPopup({ isOpen, onClose }: LeaderboardPopupProps) {
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 landing-headline">
             SaaS Feedback Leaderboard
           </h2>
-          <p className="text-lg text-muted max-w-3xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
             Ranked by feedback responsiveness, not just revenue. See which products are
             <span className="text-accent font-medium"> actually listening</span> to their users.
           </p>
 
-          <div className="mt-6 inline-flex items-center gap-2 bg-background/50 backdrop-blur-sm border border-border rounded-lg p-1">
+          <div className="mt-6 inline-flex items-center gap-2 bg-background/80 backdrop-blur-sm border border-border rounded-lg p-1 shadow-sm">
             <Button
               variant={timeframe === 'month' ? 'default' : 'ghost'}
               onClick={() => setTimeframe('month')}
@@ -233,33 +233,33 @@ export function LeaderboardPopup({ isOpen, onClose }: LeaderboardPopupProps) {
         </div>
 
         {/* Leaderboard Table */}
-        <Card className="bg-background/50 backdrop-blur-sm border border-border overflow-hidden">
+        <Card className="bg-card/95 backdrop-blur-sm border border-border overflow-hidden shadow-md">
           {/* Table Header */}
-          <div className="grid grid-cols-12 gap-4 p-4 border-b border-border text-sm font-medium text-muted-foreground">
-            <div className="col-span-1 text-center">Rank</div>
-            <div className="col-span-3">Product</div>
-            <div className="col-span-2 text-center">Improvement Score</div>
-            <div className="col-span-2 text-center">Response Time</div>
-            <div className="col-span-2 text-center">Shipped Features</div>
-            <div className="col-span-2 text-center">Maker</div>
+          <div className="grid grid-cols-12 gap-4 p-4 border-b border-border text-sm font-medium bg-muted/30">
+            <div className="col-span-1 text-center text-foreground">Rank</div>
+            <div className="col-span-3 text-foreground">Product</div>
+            <div className="col-span-2 text-center text-foreground">Improvement Score</div>
+            <div className="col-span-2 text-center text-foreground">Response Time</div>
+            <div className="col-span-2 text-center text-foreground">Shipped Features</div>
+            <div className="col-span-2 text-center text-foreground">Maker</div>
           </div>
 
           {/* Table Rows */}
           {leaderboardData.map((entry) => (
             <div
               key={entry.rank}
-              className="grid grid-cols-12 gap-4 p-4 border-b border-border items-center hover:bg-background/70 transition-colors"
+              className="grid grid-cols-12 gap-4 p-4 border-b border-border items-center hover:bg-muted/20 transition-colors"
             >
               {/* Rank */}
               <div className="col-span-1 flex justify-center">
                 <div
                   className={`h-8 w-8 rounded-full flex items-center justify-center font-bold ${
                     entry.rank === 1
-                      ? 'bg-yellow-500/20 text-yellow-500'
+                      ? 'bg-yellow-500/20 text-yellow-700 dark:text-yellow-500'
                       : entry.rank === 2
-                        ? 'bg-gray-400/20 text-gray-400'
+                        ? 'bg-gray-400/20 text-gray-700 dark:text-gray-400'
                         : entry.rank === 3
-                          ? 'bg-amber-700/20 text-amber-700'
+                          ? 'bg-amber-700/20 text-amber-800 dark:text-amber-700'
                           : 'bg-primary/10 text-primary'
                   }`}
                 >
@@ -270,15 +270,17 @@ export function LeaderboardPopup({ isOpen, onClose }: LeaderboardPopupProps) {
               {/* Product */}
               <div className="col-span-3 flex items-center gap-3">
                 {entry.logo ? (
-                  <Image src={entry.logo} alt={entry.name} width={32} height={32} className="rounded-full" />
+                  <div className="h-8 w-8 rounded-full overflow-hidden bg-background border border-border p-1">
+                    <Image src={entry.logo} alt={entry.name} width={32} height={32} className="rounded-full" />
+                  </div>
                 ) : (
                   <LogoPlaceholder name={entry.name} />
                 )}
                 <div>
-                  <div className="font-medium">{entry.name}</div>
+                  <div className="font-medium text-foreground">{entry.name}</div>
                   {entry.badge && (
                     <Badge
-                      className={`mt-1 bg-${entry.badge.color}-500/20 text-${entry.badge.color}-400 border border-${entry.badge.color}-500/50`}
+                      className={`mt-1 bg-${entry.badge.color}-500/20 text-${entry.badge.color}-700 dark:text-${entry.badge.color}-400 border border-${entry.badge.color}-500/50`}
                     >
                       <Check className="h-3 w-3 mr-1" /> {entry.badge.text}
                     </Badge>
@@ -288,38 +290,40 @@ export function LeaderboardPopup({ isOpen, onClose }: LeaderboardPopupProps) {
 
               {/* Improvement Score */}
               <div className="col-span-2 text-center">
-                <div className="font-bold text-lg">{entry.improvementScore}</div>
+                <div className="font-bold text-lg text-foreground">{entry.improvementScore}</div>
                 <div className="text-xs text-muted-foreground">points</div>
               </div>
 
               {/* Response Time */}
               <div className="col-span-2 text-center">
-                <div className="font-medium">{entry.responseTime}</div>
+                <div className="font-medium text-foreground">{entry.responseTime}</div>
                 <div className="text-xs text-muted-foreground">to feedback</div>
               </div>
 
               {/* Shipped Features */}
               <div className="col-span-2 text-center">
-                <div className="font-medium">{entry.shippedFeatures}</div>
+                <div className="font-medium text-foreground">{entry.shippedFeatures}</div>
                 <div className="text-xs text-muted-foreground">this {timeframe}</div>
               </div>
 
               {/* Maker */}
               <div className="col-span-2 flex items-center justify-center gap-2">
                 {entry.maker.avatar ? (
-                  <Image
-                    src={entry.maker.avatar}
-                    alt={entry.maker.name}
-                    width={24}
-                    height={24}
-                    className="rounded-full"
-                  />
+                  <div className="w-6 h-6 rounded-full overflow-hidden border border-border">
+                    <Image
+                      src={entry.maker.avatar}
+                      alt={entry.maker.name}
+                      width={24}
+                      height={24}
+                      className="rounded-full"
+                    />
+                  </div>
                 ) : (
                   <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs">
                     {entry.maker.name.charAt(0)}
                   </div>
                 )}
-                <span className="text-sm">{entry.maker.name}</span>
+                <span className="text-sm text-foreground">{entry.maker.name}</span>
               </div>
             </div>
           ))}
