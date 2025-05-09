@@ -2,24 +2,11 @@
 
 import { DashboardPageHeader } from '@/components/dashboard/layout/dashboard-page-header';
 import { useState, useEffect } from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Star, Check, X } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
@@ -44,7 +31,7 @@ const mockTestimonials = [
   },
   {
     id: '2',
-    content: 'Great product, but there\'s still room for improvement in the reporting features.',
+    content: "Great product, but there's still room for improvement in the reporting features.",
     rating: 4,
     approved: true,
     createdAt: '2023-08-15T16:30:00Z',
@@ -104,8 +91,25 @@ const mockTestimonials = [
   },
 ];
 
+// Interface for testimonial items
+interface TestimonialItem {
+  id: string;
+  content: string;
+  rating: number;
+  approved: boolean;
+  createdAt: string;
+  product: {
+    name: string;
+    slug: string;
+  };
+  createdBy: {
+    name: string;
+    email: string;
+  };
+}
+
 export default function TestimonialsPage() {
-  const [testimonials, setTestimonials] = useState([]);
+  const [testimonials, setTestimonials] = useState<TestimonialItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState({
     approved: 'all',
@@ -134,11 +138,9 @@ export default function TestimonialsPage() {
     return true;
   });
 
-  const handleApprovalChange = async (id, approved) => {
+  const handleApprovalChange = async (id: string, approved: boolean) => {
     // In a real app, this would make an API call to update the approval status
-    setTestimonials(
-      testimonials.map((item) => (item.id === id ? { ...item, approved } : item))
-    );
+    setTestimonials(testimonials.map((item) => (item.id === id ? { ...item, approved } : item)));
 
     toast({
       title: approved ? 'Testimonial approved' : 'Testimonial unapproved',
@@ -147,14 +149,11 @@ export default function TestimonialsPage() {
     });
   };
 
-  const renderStars = (rating) => {
+  const renderStars = (rating: number) => {
     return Array(5)
       .fill(0)
       .map((_, i) => (
-        <Star
-          key={i}
-          className={`h-4 w-4 ${i < rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
-        />
+        <Star key={i} className={`h-4 w-4 ${i < rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} />
       ));
   };
 
@@ -176,10 +175,7 @@ export default function TestimonialsPage() {
                 onChange={(e) => setFilter({ ...filter, search: e.target.value })}
               />
             </div>
-            <Select
-              value={filter.approved}
-              onValueChange={(value) => setFilter({ ...filter, approved: value })}
-            >
+            <Select value={filter.approved} onValueChange={(value) => setFilter({ ...filter, approved: value })}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Filter by approval" />
               </SelectTrigger>
@@ -189,10 +185,7 @@ export default function TestimonialsPage() {
                 <SelectItem value="unapproved">Pending Approval</SelectItem>
               </SelectContent>
             </Select>
-            <Select
-              value={filter.rating}
-              onValueChange={(value) => setFilter({ ...filter, rating: value })}
-            >
+            <Select value={filter.rating} onValueChange={(value) => setFilter({ ...filter, rating: value })}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Filter by rating" />
               </SelectTrigger>
@@ -205,10 +198,7 @@ export default function TestimonialsPage() {
                 <SelectItem value="1">1 Star</SelectItem>
               </SelectContent>
             </Select>
-            <Select
-              value={filter.product}
-              onValueChange={(value) => setFilter({ ...filter, product: value })}
-            >
+            <Select value={filter.product} onValueChange={(value) => setFilter({ ...filter, product: value })}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Filter by product" />
               </SelectTrigger>
@@ -240,9 +230,7 @@ export default function TestimonialsPage() {
               <TableBody>
                 {filteredItems.map((item) => (
                   <TableRow key={item.id}>
-                    <TableCell className="font-medium max-w-[300px] truncate">
-                      {item.content}
-                    </TableCell>
+                    <TableCell className="font-medium max-w-[300px] truncate">{item.content}</TableCell>
                     <TableCell>
                       <div className="flex">{renderStars(item.rating)}</div>
                     </TableCell>
@@ -260,9 +248,7 @@ export default function TestimonialsPage() {
                           checked={item.approved}
                           onCheckedChange={(checked) => handleApprovalChange(item.id, checked)}
                         />
-                        <span className="text-sm text-muted-foreground">
-                          {item.approved ? 'Approved' : 'Approve'}
-                        </span>
+                        <span className="text-sm text-muted-foreground">{item.approved ? 'Approved' : 'Approve'}</span>
                       </div>
                     </TableCell>
                   </TableRow>

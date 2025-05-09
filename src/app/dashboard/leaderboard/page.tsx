@@ -68,8 +68,22 @@ const mockLeaderboardEntries = [
   },
 ];
 
+// Interface for leaderboard entries
+interface LeaderboardEntry {
+  id: string;
+  rank: number;
+  productName: string;
+  productSlug: string;
+  logoUrl: string;
+  websiteUrl: string;
+  score: number;
+  feedbackCount: number;
+  testimonialCount: number;
+  badgeCount: number;
+}
+
 export default function LeaderboardPage() {
-  const [entries, setEntries] = useState([]);
+  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -83,7 +97,7 @@ export default function LeaderboardPage() {
   return (
     <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-8">
       <DashboardPageHeader pageTitle={'Leaderboard'} />
-      
+
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <div className="animate-pulse">Loading leaderboard data...</div>

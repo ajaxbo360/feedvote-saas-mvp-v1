@@ -10,7 +10,7 @@ import { MessageSquare, Star, Award, BarChart2, ArrowRight, Check, Clock, Thumbs
 import { ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FeedFeaturePricing } from '@/components/home/pricing/feed-feature-pricing';
+import { FeedfeaturePricing } from '@/components/home/pricing/feedfeature-pricing';
 import { FeedFeatureLeaderboard } from '@/components/home/leaderboard/feed-feature-leaderboard';
 import { LeaderboardButton } from '@/components/home/leaderboard/leaderboard-button';
 import Header from '@/components/home/header/header';
@@ -523,7 +523,7 @@ export function LandingPage() {
         </section>
 
         {/* Pricing Section */}
-        <FeedFeaturePricing />
+        <FeedfeaturePricing />
 
         {/* FAQ Section */}
         <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16 relative">
