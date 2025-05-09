@@ -1,0 +1,21 @@
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://feedfeature.com/sitemap.xml
+
+# Prevent crawling of private areas
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/
+
+# Allow crawling of important pages
+Allow: /pricing
+Allow: /features
+Allow: /login
+Allow: /signup
+
+# Crawl-delay for all bots
+Crawl-delay: 1 

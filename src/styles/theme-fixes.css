@@ -1,0 +1,78 @@
+/* Theme contrast fixes */
+
+/* Light mode specific styles */
+:root {
+  /* Improved contrast colors for light mode */
+  --heading-color: #0f172a; /* Dark blue/slate for headings */
+  --text-accent: #2563eb; /* Blue for accent text */
+  --text-accent-hover: #1e40af; /* Darker blue for hover states */
+  --green-accent: #16a34a; /* Vibrant green */
+  --blue-accent: #2563eb; /* Vibrant blue */
+  --button-text: #ffffff; /* White text on buttons */
+  --muted-text: #4b5563; /* Gray-600 for muted text */
+}
+
+/* Dark mode specific styles */
+.dark {
+  /* Improved contrast colors for dark mode */
+  --heading-color: #f8fafc; /* Very light gray for headings */
+  --text-accent: #38bdf8; /* Light blue for accent text */
+  --text-accent-hover: #0ea5e9; /* Brighter blue for hover states */
+  --green-accent: #4ade80; /* Lighter green */
+  --blue-accent: #60a5fa; /* Lighter blue */
+  --button-text: #ffffff; /* White text on buttons */
+  --muted-text: #94a3b8; /* Gray-400 for muted text */
+}
+
+/* Apply these styles to specific elements */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--heading-color);
+}
+
+.text-accent {
+  color: var(--text-accent);
+}
+
+.text-gradient {
+  background: linear-gradient(to right, var(--green-accent), var(--blue-accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Higher contrast for buttons */
+.btn-primary {
+  background: linear-gradient(to right, var(--green-accent), var(--blue-accent));
+  color: var(--button-text);
+  font-weight: 600;
+}
+
+.btn-outline {
+  border: 1px solid var(--text-accent);
+  color: var(--text-accent);
+}
+
+/* Muted text with better contrast */
+.text-muted {
+  color: var(--muted-text);
+}
+
+/* Special styles for the landing page headline */
+.landing-headline {
+  color: var(--heading-color);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+.accent-gradient-text {
+  background: linear-gradient(to right, var(--green-accent), var(--blue-accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 700;
+}
