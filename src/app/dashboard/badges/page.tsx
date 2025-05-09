@@ -6,16 +6,34 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Award, Check, Info, Lock } from 'lucide-react';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Progress } from '@/components/ui/progress';
 
+// Define the badge type
+interface BadgeCriteria {
+  feedbackCount?: number;
+  testimonialCount?: number;
+  responseRate?: number;
+  implementedFeatures?: number;
+  totalUpvotes?: number;
+  leaderboardRank?: number;
+  current: number | string;
+}
+
+interface BadgeType {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  earned: boolean;
+  progress: number;
+  criteria: BadgeCriteria;
+  earnedAt?: string;
+  locked?: boolean;
+}
+
 // Mock data - in a real app, this would come from an API call
-const mockBadges = [
+const mockBadges: BadgeType[] = [
   {
     id: '1',
     name: 'Feedback Champion',
@@ -95,7 +113,7 @@ const mockBadges = [
 ];
 
 export default function BadgesPage() {
-  const [badges, setBadges] = useState([]);
+  const [badges, setBadges] = useState<BadgeType[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -111,91 +129,92 @@ export default function BadgesPage() {
       <DashboardPageHeader pageTitle={'Badges'} />
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {loading ? (
-          Array(6)
-            .fill(0)
-            .map((_, i) => (
-              <Card key={i} className="bg-background/50 backdrop-blur-[24px] border-border">
+        {loading
+          ? Array(6)
+              .fill(0)
+              .map((_, i) => (
+                <Card key={i} className="bg-background/50 backdrop-blur-[24px] border-border">
+                  <CardContent className="p-6">
+                    <div className="animate-pulse flex flex-col items-center space-y-4">
+                      <div className="h-16 w-16 rounded-full bg-gray-700"></div>
+                      <div className="h-4 w-3/4 bg-gray-700 rounded"></div>
+                      <div className="h-3 w-full bg-gray-700 rounded"></div>
+                      <div className="h-2 w-full bg-gray-700 rounded"></div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+          : badges.map((badge) => (
+              <Card
+                key={badge.id}
+                className={`bg-background/50 backdrop-blur-[24px] border-border ${badge.locked ? 'opacity-60' : ''}`}
+              >
                 <CardContent className="p-6">
-                  <div className="animate-pulse flex flex-col items-center space-y-4">
-                    <div className="h-16 w-16 rounded-full bg-gray-700"></div>
-                    <div className="h-4 w-3/4 bg-gray-700 rounded"></div>
-                    <div className="h-3 w-full bg-gray-700 rounded"></div>
-                    <div className="h-2 w-full bg-gray-700 rounded"></div>
+                  <div className="flex flex-col items-center text-center">
+                    <div
+                      className={`text-4xl mb-4 h-16 w-16 flex items-center justify-center rounded-full ${
+                        badge.earned
+                          ? 'bg-green-500/20 border-2 border-green-500'
+                          : badge.locked
+                            ? 'bg-gray-500/20 border-2 border-gray-500'
+                            : 'bg-blue-500/20 border-2 border-blue-500'
+                      }`}
+                    >
+                      {badge.locked ? <Lock className="h-8 w-8 text-gray-400" /> : badge.icon}
+                    </div>
+
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="text-lg font-semibold">{badge.name}</h3>
+                      {badge.earned && <Check className="h-5 w-5 text-green-500" />}
+                    </div>
+
+                    <p className="text-sm text-muted-foreground mb-4">{badge.description}</p>
+
+                    {!badge.locked && (
+                      <>
+                        <div className="w-full mb-2">
+                          <Progress value={badge.progress} className="h-2" />
+                        </div>
+
+                        <div className="flex items-center justify-between w-full text-xs text-muted-foreground">
+                          <span>
+                            {badge.earned
+                              ? 'Earned on ' +
+                                (badge.earnedAt ? new Date(badge.earnedAt).toLocaleDateString() : 'unknown date')
+                              : `${badge.criteria.current}/${Object.values(badge.criteria)[0]} ${Object.keys(
+                                  badge.criteria,
+                                )[0]
+                                  .replace(/([A-Z])/g, ' $1')
+                                  .toLowerCase()}`}
+                          </span>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <Info className="h-4 w-4" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>
+                                  {Object.keys(badge.criteria)[0]
+                                    .replace(/([A-Z])/g, ' $1')
+                                    .toLowerCase()}
+                                  : {badge.criteria.current}/{Object.values(badge.criteria)[0]}
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                      </>
+                    )}
+
+                    {badge.locked && (
+                      <Badge variant="outline" className="mt-2">
+                        Locked
+                      </Badge>
+                    )}
                   </div>
                 </CardContent>
               </Card>
-            ))
-        ) : (
-          badges.map((badge) => (
-            <Card
-              key={badge.id}
-              className={`bg-background/50 backdrop-blur-[24px] border-border ${
-                badge.locked ? 'opacity-60' : ''
-              }`}
-            >
-              <CardContent className="p-6">
-                <div className="flex flex-col items-center text-center">
-                  <div
-                    className={`text-4xl mb-4 h-16 w-16 flex items-center justify-center rounded-full ${
-                      badge.earned
-                        ? 'bg-green-500/20 border-2 border-green-500'
-                        : badge.locked
-                        ? 'bg-gray-500/20 border-2 border-gray-500'
-                        : 'bg-blue-500/20 border-2 border-blue-500'
-                    }`}
-                  >
-                    {badge.locked ? <Lock className="h-8 w-8 text-gray-400" /> : badge.icon}
-                  </div>
-
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-lg font-semibold">{badge.name}</h3>
-                    {badge.earned && <Check className="h-5 w-5 text-green-500" />}
-                  </div>
-
-                  <p className="text-sm text-muted-foreground mb-4">{badge.description}</p>
-
-                  {!badge.locked && (
-                    <>
-                      <div className="w-full mb-2">
-                        <Progress value={badge.progress} className="h-2" />
-                      </div>
-
-                      <div className="flex items-center justify-between w-full text-xs text-muted-foreground">
-                        <span>
-                          {badge.earned
-                            ? 'Earned on ' + new Date(badge.earnedAt).toLocaleDateString()
-                            : `${badge.criteria.current}/${
-                                Object.values(badge.criteria)[0]
-                              } ${Object.keys(badge.criteria)[0].replace(/([A-Z])/g, ' $1').toLowerCase()}`}
-                        </span>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <Info className="h-4 w-4" />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>
-                                {Object.keys(badge.criteria)[0].replace(/([A-Z])/g, ' $1').toLowerCase()}: {badge.criteria.current}/
-                                {Object.values(badge.criteria)[0]}
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </div>
-                    </>
-                  )}
-
-                  {badge.locked && (
-                    <Badge variant="outline" className="mt-2">
-                      Locked
-                    </Badge>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
+            ))}
       </div>
     </main>
   );
