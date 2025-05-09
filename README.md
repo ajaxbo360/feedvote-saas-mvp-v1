@@ -34,11 +34,13 @@ This project is built with:
 ## Getting Started
 
 1. Clone the repository
+
    ```sh
    git clone https://github.com/YOUR_USERNAME/feedfeature-landing.git
    ```
 
 2. Install dependencies using your preferred package manager:
+
    ```sh
    # Using npm
    npm install
@@ -54,6 +56,7 @@ This project is built with:
    Copy `.env.local.example` to `.env.local` and fill in your environment variables.
 
 4. Run the development server:
+
    ```sh
    npm run dev
    # or

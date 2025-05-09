@@ -7,8 +7,8 @@
   },
   "scripts": {
     "dev": "bash -c 'source $HOME/.nvm/nvm.sh && npx next dev'",
-    "build": "next build",
-    "start": "next start",
+    "build": "bash -c 'source $HOME/.nvm/nvm.sh && npx next build'",
+    "start": "bash -c 'source $HOME/.nvm/nvm.sh && npx next start'",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "prettier": "prettier --write --ignore-unknown .",
