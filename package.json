@@ -6,9 +6,9 @@
     "node": ">=20"
   },
   "scripts": {
-    "dev": "bash -c 'source $HOME/.nvm/nvm.sh && npx next dev'",
-    "build": "bash -c 'source $HOME/.nvm/nvm.sh && npx next build'",
-    "start": "bash -c 'source $HOME/.nvm/nvm.sh && npx next start'",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "prettier": "prettier --write --ignore-unknown .",
