@@ -2,29 +2,38 @@
 
 import { DashboardPageHeader } from '@/components/dashboard/layout/dashboard-page-header';
 import { useState, useEffect } from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { ThumbsUp } from 'lucide-react';
 
+// Define types for the feedback items
+interface Product {
+  name: string;
+  slug: string;
+}
+
+interface User {
+  name: string;
+  email: string;
+}
+
+interface FeedbackItem {
+  id: string;
+  content: string;
+  type: string;
+  votes: number;
+  status: string;
+  createdAt: string;
+  product: Product;
+  createdBy: User;
+}
+
 // Mock data - in a real app, this would come from an API call
-const mockFeedbackItems = [
+const mockFeedbackItems: FeedbackItem[] = [
   {
     id: '1',
     content: 'I would love to see a dark mode option in the next update.',
@@ -108,7 +117,7 @@ const mockFeedbackItems = [
 ];
 
 export default function FeedbackPage() {
-  const [feedbackItems, setFeedbackItems] = useState([]);
+  const [feedbackItems, setFeedbackItems] = useState<FeedbackItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState({
     status: 'all',
@@ -133,7 +142,8 @@ export default function FeedbackPage() {
     return true;
   });
 
-  const statusColors = {
+  // Define status colors with proper TypeScript index signature
+  const statusColors: Record<string, string> = {
     new: 'bg-blue-500',
     planned: 'bg-purple-500',
     in_progress: 'bg-yellow-500',
@@ -141,11 +151,9 @@ export default function FeedbackPage() {
     declined: 'bg-red-500',
   };
 
-  const handleStatusChange = async (id, newStatus) => {
+  const handleStatusChange = async (id: string, newStatus: string) => {
     // In a real app, this would make an API call to update the status
-    setFeedbackItems(
-      feedbackItems.map((item) => (item.id === id ? { ...item, status: newStatus } : item))
-    );
+    setFeedbackItems(feedbackItems.map((item) => (item.id === id ? { ...item, status: newStatus } : item)));
   };
 
   return (
@@ -166,10 +174,7 @@ export default function FeedbackPage() {
                 onChange={(e) => setFilter({ ...filter, search: e.target.value })}
               />
             </div>
-            <Select
-              value={filter.status}
-              onValueChange={(value) => setFilter({ ...filter, status: value })}
-            >
+            <Select value={filter.status} onValueChange={(value) => setFilter({ ...filter, status: value })}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
@@ -182,10 +187,7 @@ export default function FeedbackPage() {
                 <SelectItem value="declined">Declined</SelectItem>
               </SelectContent>
             </Select>
-            <Select
-              value={filter.type}
-              onValueChange={(value) => setFilter({ ...filter, type: value })}
-            >
+            <Select value={filter.type} onValueChange={(value) => setFilter({ ...filter, type: value })}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Filter by type" />
               </SelectTrigger>
@@ -196,10 +198,7 @@ export default function FeedbackPage() {
                 <SelectItem value="plan_suggestion">Plan Suggestion</SelectItem>
               </SelectContent>
             </Select>
-            <Select
-              value={filter.product}
-              onValueChange={(value) => setFilter({ ...filter, product: value })}
-            >
+            <Select value={filter.product} onValueChange={(value) => setFilter({ ...filter, product: value })}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Filter by product" />
               </SelectTrigger>
@@ -231,9 +230,7 @@ export default function FeedbackPage() {
               <TableBody>
                 {filteredItems.map((item) => (
                   <TableRow key={item.id}>
-                    <TableCell className="font-medium max-w-[300px] truncate">
-                      {item.content}
-                    </TableCell>
+                    <TableCell className="font-medium max-w-[300px] truncate">{item.content}</TableCell>
                     <TableCell>
                       <Badge variant="outline">{item.type.replace('_', ' ')}</Badge>
                     </TableCell>
@@ -245,16 +242,11 @@ export default function FeedbackPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge className={statusColors[item.status]}>
-                        {item.status.replace('_', ' ')}
-                      </Badge>
+                      <Badge className={statusColors[item.status]}>{item.status.replace('_', ' ')}</Badge>
                     </TableCell>
                     <TableCell>{new Date(item.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell>
-                      <Select
-                        value={item.status}
-                        onValueChange={(value) => handleStatusChange(item.id, value)}
-                      >
+                      <Select value={item.status} onValueChange={(value) => handleStatusChange(item.id, value)}>
                         <SelectTrigger className="w-[130px]">
                           <SelectValue placeholder="Change status" />
                         </SelectTrigger>
