@@ -86,9 +86,7 @@ export default function SettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle>General Settings</CardTitle>
-              <CardDescription>
-                Manage your product information and appearance
-              </CardDescription>
+              <CardDescription>Manage your product information and appearance</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -96,9 +94,7 @@ export default function SettingsPage() {
                 <Input
                   id="productName"
                   value={generalSettings.productName}
-                  onChange={(e) =>
-                    setGeneralSettings({ ...generalSettings, productName: e.target.value })
-                  }
+                  onChange={(e) => setGeneralSettings({ ...generalSettings, productName: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
@@ -106,9 +102,7 @@ export default function SettingsPage() {
                 <Textarea
                   id="productDescription"
                   value={generalSettings.productDescription}
-                  onChange={(e) =>
-                    setGeneralSettings({ ...generalSettings, productDescription: e.target.value })
-                  }
+                  onChange={(e) => setGeneralSettings({ ...generalSettings, productDescription: e.target.value })}
                   rows={3}
                 />
               </div>
@@ -117,9 +111,7 @@ export default function SettingsPage() {
                 <Input
                   id="websiteUrl"
                   value={generalSettings.websiteUrl}
-                  onChange={(e) =>
-                    setGeneralSettings({ ...generalSettings, websiteUrl: e.target.value })
-                  }
+                  onChange={(e) => setGeneralSettings({ ...generalSettings, websiteUrl: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
@@ -127,9 +119,7 @@ export default function SettingsPage() {
                 <Input
                   id="logoUrl"
                   value={generalSettings.logoUrl}
-                  onChange={(e) =>
-                    setGeneralSettings({ ...generalSettings, logoUrl: e.target.value })
-                  }
+                  onChange={(e) => setGeneralSettings({ ...generalSettings, logoUrl: e.target.value })}
                   placeholder="https://example.com/logo.png"
                 />
               </div>
@@ -146,17 +136,13 @@ export default function SettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Feedback Settings</CardTitle>
-              <CardDescription>
-                Configure how feedback and testimonials are collected and displayed
-              </CardDescription>
+              <CardDescription>Configure how feedback and testimonials are collected and displayed</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="enableFeedbackWidget">Enable Feedback Widget</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Show the feedback collection widget on your website
-                  </p>
+                  <p className="text-sm text-muted-foreground">Show the feedback collection widget on your website</p>
                 </div>
                 <Switch
                   id="enableFeedbackWidget"
@@ -171,9 +157,7 @@ export default function SettingsPage() {
                 <Label htmlFor="widgetPosition">Widget Position</Label>
                 <Select
                   value={feedbackSettings.widgetPosition}
-                  onValueChange={(value) =>
-                    setFeedbackSettings({ ...feedbackSettings, widgetPosition: value })
-                  }
+                  onValueChange={(value) => setFeedbackSettings({ ...feedbackSettings, widgetPosition: value })}
                   disabled={!feedbackSettings.enableFeedbackWidget}
                 >
                   <SelectTrigger id="widgetPosition">
@@ -191,9 +175,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="collectAnonymousFeedback">Allow Anonymous Feedback</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Let users submit feedback without signing in
-                  </p>
+                  <p className="text-sm text-muted-foreground">Let users submit feedback without signing in</p>
                 </div>
                 <Switch
                   id="collectAnonymousFeedback"
@@ -207,9 +189,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="notifyOnNewFeedback">Notify on New Feedback</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Receive notifications when new feedback is submitted
-                  </p>
+                  <p className="text-sm text-muted-foreground">Receive notifications when new feedback is submitted</p>
                 </div>
                 <Switch
                   id="notifyOnNewFeedback"
@@ -248,9 +228,7 @@ export default function SettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Integrations</CardTitle>
-              <CardDescription>
-                Connect FeedFeature with your other tools and services
-              </CardDescription>
+              <CardDescription>Connect FeedVote with your other tools and services</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -292,9 +270,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between pt-4">
                 <div>
                   <Label htmlFor="enableEmailNotifications">Email Notifications</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Receive email notifications for important events
-                  </p>
+                  <p className="text-sm text-muted-foreground">Receive email notifications for important events</p>
                 </div>
                 <Switch
                   id="enableEmailNotifications"

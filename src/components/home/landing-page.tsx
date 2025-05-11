@@ -10,8 +10,8 @@ import { MessageSquare, Star, Award, BarChart2, ArrowRight, Check, Clock, Thumbs
 import { ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FeedfeaturePricing } from '@/components/home/pricing/feedfeature-pricing';
-import { FeedFeatureLeaderboard } from '@/components/home/leaderboard/feed-feature-leaderboard';
+import { FeedVotePricing } from '@/components/home/pricing/feedvote-pricing';
+import { FeedVoteLeaderboard } from '@/components/home/leaderboard/feed-vote-leaderboard';
 import { LeaderboardButton } from '@/components/home/leaderboard/leaderboard-button';
 import Header from '@/components/home/header/header';
 import { CurvedArrow } from '@/components/ui/curved-arrow';
@@ -72,7 +72,7 @@ export function LandingPage() {
                         strokeLinejoin="round"
                       />
                     </svg>
-                    Get FeedFeature
+                    Get FeedVote
                   </Link>
                 </Button>
 
@@ -149,7 +149,7 @@ export function LandingPage() {
 
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-10">
               Founders who <span className="text-gray-900 dark:text-white font-medium">respond quickly</span> to user
-              feedback build trust faster. FeedFeature helps you collect feedback, prioritize features, and{' '}
+              feedback build trust faster. FeedVote helps you collect feedback, prioritize features, and{' '}
               <span className="text-gray-900 dark:text-white font-medium">showcase improvements</span> that prove you're
               listening.
             </p>
@@ -263,7 +263,7 @@ export function LandingPage() {
 
           <div className="text-center mt-12">
             <Button className="gradient-button rounded-xl px-6 py-3 font-semibold text-sm shadow-md" asChild>
-              <Link href="/signup">Try FeedFeature Free</Link>
+              <Link href="/signup">Try FeedVote Free</Link>
             </Button>
           </div>
         </section>
@@ -303,9 +303,9 @@ export function LandingPage() {
                     </div>
                   </div>
                   <p className="text-xl mb-4">
-                    "FeedFeature helped us build exactly what our users wanted. Our customer satisfaction increased by
-                    47% in just 3 months because they saw we were actually listening. The improvement points system
-                    gamified our development process in a way that aligned perfectly with user needs."
+                    "FeedVote helped us build exactly what our users wanted. Our customer satisfaction increased by 47%
+                    in just 3 months because they saw we were actually listening. The improvement points system gamified
+                    our development process in a way that aligned perfectly with user needs."
                   </p>
                   <div className="flex items-center mt-2">
                     <div className="flex">
@@ -523,7 +523,7 @@ export function LandingPage() {
         </section>
 
         {/* Pricing Section */}
-        <FeedfeaturePricing />
+        <FeedVotePricing />
 
         {/* FAQ Section */}
         <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16 relative">
@@ -539,7 +539,7 @@ export function LandingPage() {
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-6 pb-4 text-gray-600 dark:text-gray-300 select-text">
-                Yes, FeedFeature offers a free plan with all core features. Premium plans are available for additional
+                Yes, FeedVote offers a free plan with all core features. Premium plans are available for additional
                 features and higher usage limits.
               </AccordionContent>
             </AccordionItem>
@@ -590,7 +590,7 @@ export function LandingPage() {
         <footer className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 border-t border-border">
           <div className="flex flex-col md:flex-row justify-between items-center select-text">
             <div className="mb-4 md:mb-0">
-              <p className="text-lg font-semibold">FeedFeature</p>
+              <p className="text-lg font-semibold">FeedVote</p>
               <p className="text-sm text-muted-foreground">Shape Your SaaS with User Feedback</p>
             </div>
 
@@ -599,10 +599,10 @@ export function LandingPage() {
                 <ExternalLink className="h-5 w-5" />
               </Link>
               <Link
-                href="mailto:contact@feedfeature.com"
+                href="mailto:contact@feedvote.com"
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
-                contact@feedfeature.com
+                contact@feedvote.com
               </Link>
               <Link href="/terms" className="text-muted-foreground hover:text-primary transition-colors">
                 Terms of Service

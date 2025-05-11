@@ -118,7 +118,7 @@ const LogoPlaceholder = ({ name }: { name: string }) => {
   );
 };
 
-export function FeedFeatureLeaderboard() {
+export function FeedVoteLeaderboard() {
   const [timeframe, setTimeframe] = useState<'month' | 'all-time'>('month');
 
   return (

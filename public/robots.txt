@@ -3,7 +3,7 @@ User-agent: *
 Allow: /
 
 # Sitemap location
-Sitemap: https://feedfeature.com/sitemap.xml
+Sitemap: https://FeedVote.com/sitemap.xml
 
 # Prevent crawling of private areas
 Disallow: /dashboard/

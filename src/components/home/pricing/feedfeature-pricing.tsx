@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Check, X, Zap } from 'lucide-react';
 import Link from 'next/link';
 
-export function FeedfeaturePricing() {
+export function FeedVotePricing() {
   const [frequency, setFrequency] = useState<IBillingFrequency>(BillingFrequency[0]);
 
   return (

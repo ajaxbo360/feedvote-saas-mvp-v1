@@ -1,4 +1,4 @@
-# FeedFeature Landing
+# FeedVote Landing
 
 A modern SaaS landing page and subscription management platform built with Next.js.
 
@@ -36,7 +36,7 @@ This project is built with:
 1. Clone the repository
 
    ```sh
-   git clone https://github.com/YOUR_USERNAME/feedfeature-landing.git
+   git clone https://github.com/YOUR_USERNAME/FeedVote-landing.git
    ```
 
 2. Install dependencies using your preferred package manager:

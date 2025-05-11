@@ -8,7 +8,7 @@ export function HeroSection() {
           powered by user voice.
         </h1>
         <p className={'mt-6 text-[18px] leading-[27px] md:text-[20px] md:leading-[30px]'}>
-          Collect product feedback and build trust with FeedFeature.
+          Collect product feedback and build trust with FeedVote.
         </p>
       </div>
     </section>

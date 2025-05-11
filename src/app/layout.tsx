@@ -12,11 +12,11 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | FeedFeature - Build Trust Through User Feedback',
-    default: 'FeedFeature - Build Trust Through User Feedback',
+    template: '%s | FeedVote - Build Trust Through User Feedback',
+    default: 'FeedVote - Build Trust Through User Feedback',
   },
   description:
-    'Collect and manage user feedback, build trust, and showcase your product improvements. FeedFeature helps SaaS companies respond to user needs faster.',
+    'Collect and manage user feedback, build trust, and showcase your product improvements. FeedVote helps SaaS companies respond to user needs faster.',
   keywords: [
     'user feedback',
     'customer feedback',
@@ -26,27 +26,27 @@ export const metadata: Metadata = {
     'user trust',
     'product management',
   ],
-  authors: [{ name: 'FeedFeature Team' }],
+  authors: [{ name: 'FeedVote Team' }],
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://feedfeature.com',
-    siteName: 'FeedFeature',
-    title: 'FeedFeature - Build Trust Through User Feedback',
+    url: 'https://FeedVote.com',
+    siteName: 'FeedVote',
+    title: 'FeedVote - Build Trust Through User Feedback',
     description:
-      'Collect and manage user feedback, build trust, and showcase your product improvements. FeedFeature helps SaaS companies respond to user needs faster.',
+      'Collect and manage user feedback, build trust, and showcase your product improvements. FeedVote helps SaaS companies respond to user needs faster.',
     images: [
       {
         url: '/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'FeedFeature - User Feedback Management Platform',
+        alt: 'FeedVote - User Feedback Management Platform',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'FeedFeature - Build Trust Through User Feedback',
+    title: 'FeedVote - Build Trust Through User Feedback',
     description: 'Collect and manage user feedback, build trust, and showcase your product improvements.',
     images: ['/twitter-image.jpg'],
   },
@@ -71,7 +71,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="canonical" href="https://feedfeature.com" />
+        <link rel="canonical" href="https://FeedVote.com" />
         <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
       </head>

@@ -2,24 +2,24 @@ import { Metadata } from 'next';
 import { LandingPage } from '@/components/home/landing-page';
 
 export const metadata: Metadata = {
-  title: 'FeedFeature - Build Trust Through User Feedback',
+  title: 'FeedVote - Build Trust Through User Feedback',
   description:
-    'Collect and manage user feedback, build trust, and showcase your product improvements. FeedFeature helps SaaS companies respond to user needs faster.',
+    'Collect and manage user feedback, build trust, and showcase your product improvements. FeedVote helps SaaS companies respond to user needs faster.',
   alternates: {
-    canonical: 'https://feedfeature.com',
+    canonical: 'https://FeedVote.com',
   },
   openGraph: {
     type: 'website',
-    url: 'https://feedfeature.com',
-    title: 'FeedFeature - User Feedback Management Platform',
+    url: 'https://FeedVote.com',
+    title: 'FeedVote - User Feedback Management Platform',
     description:
-      'Transform user feedback into product growth with FeedFeature. Collect, manage, and showcase your product improvements.',
+      'Transform user feedback into product growth with FeedVote. Collect, manage, and showcase your product improvements.',
     images: [
       {
         url: '/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'FeedFeature Dashboard',
+        alt: 'FeedVote Dashboard',
       },
     ],
   },
@@ -31,7 +31,7 @@ const jsonLd = {
   '@graph': [
     {
       '@type': 'SoftwareApplication',
-      name: 'FeedFeature',
+      name: 'FeedVote',
       description: 'User feedback management platform for SaaS companies',
       applicationCategory: 'BusinessApplication',
       operatingSystem: 'Web',
@@ -41,7 +41,7 @@ const jsonLd = {
         priceCurrency: 'USD',
         description: 'Free forever for the first 1000 customers',
         availability: 'https://schema.org/InStock',
-        url: 'https://feedfeature.com/pricing',
+        url: 'https://FeedVote.com/pricing',
       },
       aggregateRating: {
         '@type': 'AggregateRating',
@@ -51,18 +51,18 @@ const jsonLd = {
         worstRating: '1',
       },
       featureList: ['User feedback collection', 'Feature voting system', 'Trust badges', 'Leaderboard ranking'],
-      screenshot: 'https://feedfeature.com/assets/screenshots/dashboard.jpg',
+      screenshot: 'https://FeedVote.com/assets/screenshots/dashboard.jpg',
     },
     {
       '@type': 'Organization',
-      name: 'FeedFeature',
-      url: 'https://feedfeature.com',
-      logo: 'https://feedfeature.com/logo.png',
-      sameAs: ['https://twitter.com/feedfeature', 'https://linkedin.com/company/feedfeature'],
+      name: 'FeedVote',
+      url: 'https://FeedVote.com',
+      logo: 'https://FeedVote.com/logo.png',
+      sameAs: ['https://twitter.com/FeedVote', 'https://linkedin.com/company/FeedVote'],
       contactPoint: {
         '@type': 'ContactPoint',
         contactType: 'customer support',
-        email: 'support@feedfeature.com',
+        email: 'support@FeedVote.com',
         availableLanguage: ['English'],
       },
     },
@@ -71,10 +71,10 @@ const jsonLd = {
       mainEntity: [
         {
           '@type': 'Question',
-          name: 'Is FeedFeature free?',
+          name: 'Is FeedVote free?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Yes, FeedFeature offers a free plan with all core features. Premium plans are available for additional features and higher usage limits.',
+            text: 'Yes, FeedVote offers a free plan with all core features. Premium plans are available for additional features and higher usage limits.',
           },
         },
         {
@@ -99,7 +99,7 @@ const jsonLd = {
         name: 'Sarah Chen',
       },
       reviewBody:
-        'FeedFeature helped us build exactly what our users wanted. Our customer satisfaction increased by 47% in just 3 months.',
+        'FeedVote helped us build exactly what our users wanted. Our customer satisfaction increased by 47% in just 3 months.',
     },
   ],
 };

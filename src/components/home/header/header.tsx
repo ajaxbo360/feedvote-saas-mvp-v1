@@ -13,7 +13,7 @@ export default function Header({ user }: Props) {
       <div className="mx-auto max-w-7xl relative px-[32px] py-[18px] flex items-center justify-between">
         <div className="flex flex-1 items-center justify-start">
           <Link className="flex items-center" href={'/'}>
-            <span className="text-xl font-semibold text-gray-900 dark:text-white">FeedFeature</span>
+            <span className="text-xl font-semibold text-gray-900 dark:text-white">FeedVote</span>
           </Link>
         </div>
         <div className="flex flex-1 items-center justify-end">

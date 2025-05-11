@@ -7,7 +7,7 @@ import { Check, Trophy, Star, Medal, Link2, BarChart2, Lock, UserPlus } from 'lu
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 
-// Define the pricing tiers for FeedFeature
+// Define the pricing tiers for FeedVote
 interface PricingTier {
   name: string;
   id: string;
@@ -117,7 +117,7 @@ const pricingTiers: PricingTier[] = [
   },
 ];
 
-export function FeedFeaturePricing() {
+export function FeedVotePricing() {
   const [frequency, setFrequency] = useState<IBillingFrequency>(BillingFrequency[0]);
 
   return (
@@ -129,7 +129,7 @@ export function FeedFeaturePricing() {
             Grow Your SaaS with User Votes & Trust Signals
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            From free feedback to top leaderboard rankings, FeedFeature fits every bootstrap team.
+            From free feedback to top leaderboard rankings, FeedVote fits every bootstrap team.
             <span className="text-green-600 dark:text-green-400 font-medium">
               {' '}
               Early birds: Join the first 100 for lifetime access!
