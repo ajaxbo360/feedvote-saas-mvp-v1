@@ -15,9 +15,12 @@ import { FeedVoteLeaderboard } from '@/components/home/leaderboard/feed-vote-lea
 import { LeaderboardButton } from '@/components/home/leaderboard/leaderboard-button';
 import Header from '@/components/home/header/header';
 import { CurvedArrow } from '@/components/ui/curved-arrow';
+import { createClient } from '@/utils/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
 
 export function LandingPage() {
   const [showFloatingCTA, setShowFloatingCTA] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -27,6 +30,30 @@ export function LandingPage() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleGoogleLogin = async () => {
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) {
+        toast({
+          description: `Authentication error: ${error.message}`,
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      toast({
+        description: 'Failed to connect to authentication service',
+        variant: 'destructive',
+      });
+    }
+  };
 
   return (
     <div className="relative">
@@ -59,25 +86,15 @@ export function LandingPage() {
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button
-                  className="gradient-button rounded-xl px-8 py-6 font-semibold text-sm flex items-center justify-center shadow-md"
-                  asChild
+                  className="h-11 gradient-button rounded-xl px-6 py-3 font-semibold text-sm shadow-md bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white"
+                  onClick={handleGoogleLogin}
                 >
-                  <Link href="/signup">
-                    <svg viewBox="0 0 24 24" className="w-5 h-5 mr-2" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path
-                        d="M13 10V3L4 14H11V21L20 10H13Z"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    Get FeedVote
-                  </Link>
+                  Get Started for free
                 </Button>
 
                 <div className="text-sm text-muted mt-2 sm:mt-4">
-                  <span className="accent-gradient-text font-medium">$0 forever</span> for the first 1000 customers
+                  <span className="text-green-600 dark:text-green-400 font-medium">$0 forever</span> for the first 1000
+                  customers
                 </div>
               </div>
 
@@ -153,8 +170,11 @@ export function LandingPage() {
               <span className="text-gray-900 dark:text-white font-medium">showcase improvements</span> that prove you're
               listening.
             </p>
-            <Button className="gradient-button rounded-xl px-6 py-3 font-semibold text-sm shadow-md" asChild>
-              <Link href="/signup">Get Started Free</Link>
+            <Button
+              className="h-11 gradient-button rounded-xl px-6 py-3 font-semibold text-sm shadow-md bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white"
+              onClick={handleGoogleLogin}
+            >
+              Get Started Free
             </Button>
           </div>
         </section>
@@ -262,8 +282,11 @@ export function LandingPage() {
           </div>
 
           <div className="text-center mt-12">
-            <Button className="gradient-button rounded-xl px-6 py-3 font-semibold text-sm shadow-md" asChild>
-              <Link href="/signup">Try FeedVote Free</Link>
+            <Button
+              className="h-11 gradient-button rounded-xl px-6 py-3 font-semibold text-sm shadow-md bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white"
+              onClick={handleGoogleLogin}
+            >
+              Try FeedVote Free
             </Button>
           </div>
         </section>
@@ -455,8 +478,11 @@ export function LandingPage() {
           </div>
 
           <div className="text-center mt-12">
-            <Button className="gradient-button rounded-xl px-6 py-3 font-semibold text-sm shadow-md" asChild>
-              <Link href="/signup">Join 1,000+ Founders Free</Link>
+            <Button
+              className="h-11 gradient-button rounded-xl px-6 py-3 font-semibold text-sm shadow-md bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white"
+              onClick={handleGoogleLogin}
+            >
+              Join 1,000+ Founders Free
             </Button>
           </div>
         </section>
@@ -516,8 +542,11 @@ export function LandingPage() {
           </div>
 
           <div className="text-center mt-12">
-            <Button className="gradient-button rounded-xl px-6 py-3 font-semibold text-sm shadow-md" asChild>
-              <Link href="/signup">Start Free Now</Link>
+            <Button
+              className="h-11 gradient-button rounded-xl px-6 py-3 font-semibold text-sm shadow-md bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white"
+              onClick={handleGoogleLogin}
+            >
+              Start Free Now
             </Button>
           </div>
         </section>

@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { updateSession } from '@/utils/supabase/middleware';
+import { createServerClient } from '@supabase/ssr';
 
 export async function middleware(request: NextRequest) {
   try {
@@ -9,7 +10,40 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next();
     }
 
-    return await updateSession(request);
+    // First update the session
+    const response = await updateSession(request);
+
+    // If it's a protected route, check for authentication
+    const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard');
+
+    if (isProtectedRoute) {
+      const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+        {
+          cookies: {
+            getAll() {
+              return request.cookies.getAll();
+            },
+            setAll(cookiesToSet) {
+              cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+            },
+          },
+        },
+      );
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        // Redirect to home page instead of login if accessing a protected route without authentication
+        const redirectUrl = new URL('/', request.url);
+        return NextResponse.redirect(redirectUrl);
+      }
+    }
+
+    return response;
   } catch (error) {
     console.error('Middleware error:', error);
     // Always allow the request to continue in case of errors

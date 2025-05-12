@@ -4,10 +4,37 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check } from 'lucide-react';
-import Link from 'next/link';
+import { createClient } from '@/utils/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
 
 export function FeedVotePricing() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
+  const { toast } = useToast();
+
+  const handleGoogleLogin = async (planName?: string) => {
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: planName ? { plan: planName.toLowerCase() } : undefined,
+        },
+      });
+
+      if (error) {
+        toast({
+          description: `Authentication error: ${error.message}`,
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      toast({
+        description: 'Failed to connect to authentication service',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const plans = [
     {
@@ -25,7 +52,6 @@ export function FeedVotePricing() {
         'Standard support',
       ],
       cta: 'Get Started',
-      ctaLink: '/signup',
       popular: false,
     },
     {
@@ -44,7 +70,6 @@ export function FeedVotePricing() {
         'API access',
       ],
       cta: 'Start 14-Day Trial',
-      ctaLink: '/signup?plan=pro',
       popular: true,
     },
     {
@@ -63,7 +88,6 @@ export function FeedVotePricing() {
         'On-boarding assistance',
       ],
       cta: 'Contact Sales',
-      ctaLink: '/contact',
       popular: false,
     },
   ];
@@ -135,15 +159,16 @@ export function FeedVotePricing() {
             </CardContent>
             <CardFooter>
               <Button
-                className={`w-full ${
+                className={`w-full h-11 gradient-button rounded-xl px-6 py-3 font-semibold text-sm shadow-md ${
                   plan.popular
                     ? 'bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white'
-                    : ''
+                    : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white'
                 }`}
-                variant={plan.popular ? 'default' : 'outline'}
-                asChild
+                onClick={() =>
+                  plan.name === 'Enterprise' ? (window.location.href = '/contact') : handleGoogleLogin(plan.name)
+                }
               >
-                <Link href={plan.ctaLink}>{plan.cta}</Link>
+                {plan.cta}
               </Button>
             </CardFooter>
           </Card>
