@@ -3,6 +3,7 @@ import { DashboardLandingPage } from '@/components/dashboard/landing/dashboard-l
 import { createClient } from '@/utils/supabase/server';
 import { Button } from '@/components/ui/button';
 import { redirect } from 'next/navigation';
+import { AuthDebug } from '@/components/dashboard/auth-debug';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -26,12 +27,14 @@ export default async function DashboardPage() {
       <DashboardPageHeader pageTitle={'Dashboard'} />
 
       <div className="flex flex-col gap-4 mb-8">
+        <AuthDebug />
+
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
           <h2 className="text-xl font-semibold mb-4">Welcome, {user?.email}</h2>
           <p className="text-gray-600 dark:text-gray-300 mb-6">You have successfully signed in using Google OAuth!</p>
 
           <div className="mb-8">
-            <h3 className="text-lg font-medium mb-2">Your User Information:</h3>
+            <h3 className="text-lg font-medium mb-2">Your User Information (from Supabase):</h3>
             <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-md overflow-auto">
               <pre className="text-xs">
                 {JSON.stringify(

@@ -15,7 +15,28 @@ export async function POST(req: Request) {
   }
 
   revalidatePath('/', 'layout');
-  return NextResponse.redirect(new URL('/', req.url), {
-    status: 302,
+
+  // Return HTML with script to clear localStorage
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta http-equiv="refresh" content="0;url=/">
+        <script>
+          localStorage.removeItem('feedvote-auth-state');
+          console.log('Auth session cleared from localStorage');
+          window.location.href = "/";
+        </script>
+      </head>
+      <body>
+        Signing out...
+      </body>
+    </html>
+  `;
+
+  return new NextResponse(html, {
+    headers: {
+      'Content-Type': 'text/html',
+    },
   });
 }

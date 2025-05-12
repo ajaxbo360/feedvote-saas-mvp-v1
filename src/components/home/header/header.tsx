@@ -3,8 +3,8 @@ import { User } from '@supabase/supabase-js';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import Image from 'next/image';
-import { createClient } from '@/utils/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { signInWithGoogle } from '@/utils/auth-helper';
 
 interface Props {
   user: User | null;
@@ -15,13 +15,7 @@ export default function Header({ user }: Props) {
 
   const handleGoogleLogin = async () => {
     try {
-      const supabase = createClient();
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
+      const { error } = await signInWithGoogle();
 
       if (error) {
         toast({

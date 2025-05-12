@@ -17,6 +17,7 @@ import Header from '@/components/home/header/header';
 import { CurvedArrow } from '@/components/ui/curved-arrow';
 import { createClient } from '@/utils/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { signInWithGoogle } from '@/utils/auth-helper';
 
 export function LandingPage() {
   const [showFloatingCTA, setShowFloatingCTA] = useState(false);
@@ -33,13 +34,7 @@ export function LandingPage() {
 
   const handleGoogleLogin = async () => {
     try {
-      const supabase = createClient();
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
+      const { error } = await signInWithGoogle();
 
       if (error) {
         toast({

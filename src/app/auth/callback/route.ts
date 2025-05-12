@@ -9,9 +9,42 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
+      // At this point, we've successfully authenticated and have a session
+      // Return HTML with script to save session to localStorage
+      const html = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta http-equiv="refresh" content="0;url=${origin}${next}">
+            <script>
+              const session = ${JSON.stringify(data.session)};
+              localStorage.setItem('feedvote-auth-state', JSON.stringify({
+                access_token: session.access_token,
+                expires_at: session.expires_at,
+                expires_in: session.expires_in,
+                provider_token: session.provider_token,
+                refresh_token: session.refresh_token,
+                token_type: session.token_type,
+                user: session.user
+              }));
+              console.log('Auth session saved to localStorage');
+              window.location.href = "${origin}${next}";
+            </script>
+          </head>
+          <body>
+            Redirecting to dashboard...
+          </body>
+        </html>
+      `;
+
+      return new NextResponse(html, {
+        headers: {
+          'Content-Type': 'text/html',
+        },
+      });
     }
   }
 
