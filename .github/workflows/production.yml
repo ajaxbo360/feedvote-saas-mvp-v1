@@ -1,0 +1,89 @@
+name: Deploy to Production
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set node version
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Cache node_modules
+        id: node-modules-cache
+        uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: node-modules-cache-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Install dependencies
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Backup Database Before Migration
+        run: |
+          supabase link --project-ref ${{ secrets.PRODUCTION_PROJECT_ID }}
+          supabase db dump -f backup-production-$(date +%Y%m%d%H%M%S).sql
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
+
+      - name: Check for config drift
+        run: |
+          supabase link --project-ref ${{ secrets.PRODUCTION_PROJECT_ID }}
+          supabase db diff --schema public > schema-drift.sql
+          if [ -s schema-drift.sql ]; then
+            echo "Detected config drift. See schema differences below:"
+            cat schema-drift.sql
+            echo "This drift will be corrected by the migration."
+          fi
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
+
+      - name: Deploy Supabase migrations
+        run: |
+          supabase link --project-ref ${{ secrets.PRODUCTION_PROJECT_ID }}
+          supabase db push
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
+
+      - name: Build Next.js app
+        run: pnpm build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PRODUCTION_SUPABASE_ANON_KEY }}
+          SUPABASE_AUTH_GOOGLE_CLIENT_ID: ${{ secrets.PRODUCTION_SUPABASE_AUTH_GOOGLE_CLIENT_ID }}
+          SUPABASE_AUTH_GOOGLE_SECRET: ${{ secrets.PRODUCTION_SUPABASE_AUTH_GOOGLE_SECRET }}
+          SUPABASE_AUTH_GOOGLE_REDIRECT_URI: ${{ secrets.PRODUCTION_SUPABASE_AUTH_GOOGLE_REDIRECT_URI }}
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod --prebuilt'
+          alias-domains: |
+            feedvote.com
+            www.feedvote.com

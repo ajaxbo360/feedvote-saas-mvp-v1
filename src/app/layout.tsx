@@ -10,7 +10,25 @@ import { ThemeProvider } from '@/components/ui/theme-provider';
 
 const inter = Inter({ subsets: ['latin'] });
 
+// Dynamically set the base URL based on environment
+const getBaseUrl = () => {
+  // Check for environment variables
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return process.env.NEXT_PUBLIC_SITE_URL;
+  }
+
+  // Fallback to environment-specific defaults
+  if (process.env.NODE_ENV === 'production') {
+    // Check for Vercel environment to determine if staging or production
+    return process.env.VERCEL_ENV === 'preview' ? 'https://staging.feedvote.com' : 'https://feedvote.com';
+  }
+
+  // Local development
+  return 'http://localhost:3000';
+};
+
 export const metadata: Metadata = {
+  metadataBase: new URL(getBaseUrl()),
   title: {
     template: '%s | FeedVote - Build Trust Through User Feedback',
     default: 'FeedVote - Build Trust Through User Feedback',
@@ -30,7 +48,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://FeedVote.com',
+    url: getBaseUrl(),
     siteName: 'FeedVote',
     title: 'FeedVote - Build Trust Through User Feedback',
     description:
@@ -71,7 +89,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="canonical" href="https://FeedVote.com" />
+        <link rel="canonical" href={getBaseUrl()} />
         <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
       </head>

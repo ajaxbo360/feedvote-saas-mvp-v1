@@ -1,0 +1,69 @@
+# Supabase deployment configuration
+
+[auth]
+# The base URL of your website for different environments
+site_urls = [
+  "http://localhost:3000",
+  "https://staging.feedvote.com",
+  "https://feedvote.com",
+  "https://www.feedvote.com"
+]
+
+# A list of URLs that auth providers are permitted to redirect to
+additional_redirect_urls = [
+  "http://localhost:3000/auth/callback",
+  "https://staging.feedvote.com/auth/callback",
+  "https://feedvote.com/auth/callback",
+  "https://www.feedvote.com/auth/callback"
+]
+
+# How long tokens are valid for in seconds (1 hour)
+jwt_expiry = 3600
+
+# Enable refresh token rotation
+enable_refresh_token_rotation = true
+
+# Allow refresh tokens to be reused after expiry, up to this interval
+refresh_token_reuse_interval = 10
+
+# Allow signups
+enable_signup = true
+
+[auth.email]
+# Enable signups via email
+enable_signup = true
+
+# If enabled, users need to confirm their email address before signing in
+enable_confirmations = true
+
+[auth.external.google]
+enabled = true
+client_id = "env(SUPABASE_AUTH_GOOGLE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_GOOGLE_SECRET)"
+redirect_uri = "env(SUPABASE_AUTH_GOOGLE_REDIRECT_URI)"
+
+[functions]
+# Functions that are deployed to production
+production_functions = [
+  "auth-webhook"
+]
+
+# Functions that are deployed to staging
+staging_functions = [
+  "auth-webhook",
+  "test-function"
+]
+
+[storage]
+file_size_limit = "50MiB"
+
+[storage.buckets.public]
+public = true
+file_size_limit = "10MiB"
+allowed_mime_types = [
+  "image/png",
+  "image/jpeg",
+  "image/gif",
+  "image/webp",
+  "image/svg+xml"
+] 
