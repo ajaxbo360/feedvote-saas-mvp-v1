@@ -1,6 +1,7 @@
 'use client';
 
 import { createClient } from './supabase/client';
+import { getAuthRedirectUrl } from './url-helper';
 
 // Storage keys
 const AUTH_STORAGE_KEY = 'feedvote-auth-state';
@@ -60,7 +61,7 @@ export const signInWithGoogle = async () => {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${window.location.origin}/auth/callback`,
+      redirectTo: getAuthRedirectUrl(),
     },
   });
 

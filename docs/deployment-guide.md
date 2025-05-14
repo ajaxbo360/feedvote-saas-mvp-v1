@@ -26,6 +26,12 @@ The following environment variables must be configured in Vercel for both produc
 - `NEXT_PUBLIC_SUPABASE_URL` - Your Supabase project URL
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Your Supabase anonymous key
 
+#### Site URL Configuration (Important for OAuth)
+
+- `NEXT_PUBLIC_SITE_URL` - Set to your site URL (e.g., https://staging.feedvote.com for staging, https://feedvote.com for production)
+  - This is critical for proper OAuth redirects between environments
+  - Must match the URL configured in Supabase Auth Settings as the Site URL
+
 #### IPv4 Support (Required since Jan 29, 2024)
 
 - `POSTGRES_URL` - Supavisor URL for IPv4 support
@@ -69,12 +75,14 @@ Set up the following secrets in your GitHub repository:
 1. Push to the `staging` branch
 2. The GitHub workflow will automatically deploy to Vercel staging
 3. The deployment will be available at `staging.feedvote.com`
+4. Make sure `NEXT_PUBLIC_SITE_URL` is set to `https://staging.feedvote.com` in Vercel
 
 ### Production Deployment
 
 1. Push to the `main` branch
 2. The GitHub workflow will automatically deploy to Vercel production
 3. The deployment will be available at `feedvote.com` and `www.feedvote.com`
+4. Make sure `NEXT_PUBLIC_SITE_URL` is set to `https://feedvote.com` in Vercel
 
 ## Troubleshooting
 
@@ -85,6 +93,16 @@ This error indicates missing or incorrect Supabase environment variables.
 1. Check that `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are properly set in Vercel
 2. Make sure the variables are not truncated (common issue with the URL missing the "L" at the end)
 3. Pull environment variables locally using `npx vercel env pull` to verify them
+
+### OAuth Redirect Issues
+
+If Google Auth redirects to localhost or the wrong domain after authentication:
+
+1. Ensure `NEXT_PUBLIC_SITE_URL` is set correctly for each environment
+2. Verify that the Supabase Auth Settings > Site URL matches your environment URL
+3. Make sure all redirect URLs are configured in Supabase Auth Settings
+4. Check that your application is using the `getAuthRedirectUrl()` function from `src/utils/url-helper.ts`
+5. Run `scripts/update-redirect-urls.js` to update redirect URL patterns in Supabase
 
 ### Database Connection Issues (IPv6 Compatibility)
 
@@ -118,3 +136,4 @@ For OAuth to work properly, make sure:
 - [Supabase IPv4 Migration Guide](https://supabase.com/partners/integrations/vercel)
 - [Vercel Environment Variables](https://vercel.com/docs/concepts/projects/environment-variables)
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
+- [Supabase Auth Redirect URLs](https://supabase.com/docs/guides/auth/redirect-urls)
