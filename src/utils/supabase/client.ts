@@ -6,13 +6,19 @@ export function createClient() {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    console.warn('Supabase environment variables missing in browser client');
+    console.error('Supabase environment variables missing in browser client:');
+    console.error(`- NEXT_PUBLIC_SUPABASE_URL: ${supabaseUrl ? 'Set' : 'Missing'}`);
+    console.error(`- NEXT_PUBLIC_SUPABASE_ANON_KEY: ${supabaseAnonKey ? 'Set' : 'Missing'}`);
+
     // Return a dummy client that won't fail but won't work either
     return {
       auth: {
         getSession: async () => ({ data: { session: null }, error: null }),
         getUser: async () => ({ data: { user: null }, error: null }),
-        signInWithOAuth: async () => ({ data: null, error: new Error('Supabase not configured') }),
+        signInWithOAuth: async () => ({
+          data: null,
+          error: new Error('Supabase not configured: Environment variables missing'),
+        }),
         signOut: async () => ({ error: null }),
       },
     } as any;
