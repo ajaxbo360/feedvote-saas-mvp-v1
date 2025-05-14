@@ -18,21 +18,16 @@ jobs:
         with:
           node-version-file: '.nvmrc'
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
       - name: Cache node_modules
         id: node-modules-cache
         uses: actions/cache@v3
         with:
           path: '**/node_modules'
-          key: node-modules-cache-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: node-modules-cache-${{ hashFiles('**/package-lock.json') }}
 
       - name: Install dependencies
         if: steps.node-modules-cache.outputs.cache-hit != 'true'
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
@@ -69,7 +64,7 @@ jobs:
           SUPABASE_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
 
       - name: Build Next.js app
-        run: pnpm build
+        run: npm run build
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PRODUCTION_SUPABASE_ANON_KEY }}
