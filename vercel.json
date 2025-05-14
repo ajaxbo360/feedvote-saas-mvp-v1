@@ -4,7 +4,7 @@
       "src": "package.json",
       "use": "@vercel/next",
       "config": {
-        "installCommand": "npm install && npm install @radix-ui/react-avatar @radix-ui/react-progress @radix-ui/react-switch @radix-ui/react-tooltip"
+        "installCommand": "npm install --no-frozen-lockfile && npm install @radix-ui/react-avatar @radix-ui/react-progress @radix-ui/react-switch @radix-ui/react-tooltip"
       }
     }
   ],
