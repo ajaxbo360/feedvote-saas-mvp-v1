@@ -10,6 +10,5 @@
   ],
   "buildCommand": "npm run build",
   "framework": "nextjs",
-  "devCommand": "npm run dev",
-  "packageManager": "npm"
+  "devCommand": "npm run dev"
 }
