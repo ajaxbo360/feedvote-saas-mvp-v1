@@ -1,9 +1,14 @@
 import { createBrowserClient } from '@supabase/ssr';
+import { getEnvironmentSpecificSupabaseUrl } from '@/utils/environment-helper';
 
 export function createClient() {
-  // Check if Supabase environment variables exist
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  // Use our environment helper to ensure the correct URL based on hostname
+  // This works around issues with environment variables not being set correctly
+  const supabaseUrl = getEnvironmentSpecificSupabaseUrl() || process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  console.log('Creating Supabase client with URL:', supabaseUrl);
+  console.log('Current hostname:', typeof window !== 'undefined' ? window.location.hostname : 'server-side');
 
   if (!supabaseUrl || !supabaseAnonKey) {
     console.error('Supabase environment variables missing in browser client:');

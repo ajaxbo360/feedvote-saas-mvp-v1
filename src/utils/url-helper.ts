@@ -10,35 +10,46 @@
 export function getBaseUrl(): string {
   // Client-side
   if (typeof window !== 'undefined') {
+    // Add debug logging
+    console.log('getBaseUrl - hostname:', window.location.hostname);
+    console.log('getBaseUrl - is Vercel preview?', window.location.hostname.includes('vercel.app'));
+
     // Check if we're in a Vercel preview deployment
     const isVercelPreview = window.location.hostname.includes('vercel.app');
 
     // If we're in the staging environment, make sure to use the staging URL
     if (isVercelPreview || window.location.hostname === 'staging.feedvote.com') {
+      console.log('getBaseUrl - using staging URL:', window.location.origin);
       return window.location.origin;
     }
 
     // If we're in production
     if (window.location.hostname === 'feedvote.com' || window.location.hostname === 'www.feedvote.com') {
+      console.log('getBaseUrl - using production URL: https://feedvote.com');
       return 'https://feedvote.com';
     }
 
     // Default to current origin (works for localhost too)
+    console.log('getBaseUrl - using default origin:', window.location.origin);
     return window.location.origin;
   }
 
   // Server-side
   // First try environment variables
   if (process.env.NEXT_PUBLIC_SITE_URL) {
+    console.log('getBaseUrl (server) - using NEXT_PUBLIC_SITE_URL:', process.env.NEXT_PUBLIC_SITE_URL);
     return process.env.NEXT_PUBLIC_SITE_URL;
   }
 
   // Fallback to environment-specific defaults
   if (process.env.NODE_ENV === 'production') {
-    return process.env.VERCEL_ENV === 'preview' ? 'https://staging.feedvote.com' : 'https://feedvote.com';
+    const url = process.env.VERCEL_ENV === 'preview' ? 'https://staging.feedvote.com' : 'https://feedvote.com';
+    console.log('getBaseUrl (server) - using production fallback:', url);
+    return url;
   }
 
   // Default to localhost for SSR in development
+  console.log('getBaseUrl (server) - using development fallback: http://localhost:3000');
   return 'http://localhost:3000';
 }
 
@@ -50,5 +61,7 @@ export function getAuthRedirectUrl(path = '/auth/callback'): string {
   const baseUrl = getBaseUrl();
   // Make sure path starts with a slash
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-  return `${baseUrl}${normalizedPath}`;
+  const redirectUrl = `${baseUrl}${normalizedPath}`;
+  console.log('getAuthRedirectUrl - final URL:', redirectUrl);
+  return redirectUrl;
 }
