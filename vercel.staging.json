@@ -12,10 +12,11 @@
   "framework": "nextjs",
   "devCommand": "npm run dev",
   "env": {
-    "ENVIRONMENT": "production"
+    "ENVIRONMENT": "preview"
   },
   "github": {
     "enabled": true,
-    "silent": false
+    "silent": false,
+    "autoAlias": true
   }
 }
