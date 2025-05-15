@@ -29,37 +29,18 @@ jobs:
         if: steps.node-modules-cache.outputs.cache-hit != 'true'
         run: npm ci
 
-      - name: Setup Supabase CLI
-        uses: supabase/setup-cli@v1
-        with:
-          version: latest
+      # TEMPORARILY REMOVED DUE TO IPv6 COMPATIBILITY ISSUES
+      # - name: Setup Supabase CLI
+      #  uses: supabase/setup-cli@v1
+      #  with:
+      #    version: latest
 
-      - name: Backup Database (Safety Measure)
+      # Skip all Supabase database operations due to IPv6 incompatibility
+      - name: Database Operations Notice
         run: |
-          echo "SKIPPING: Database backup due to IPv6 connectivity issues"
-          # This step is intentionally skipped to avoid IPv6 connection issues
-          exit 0
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-
-      - name: Check for config drift
-        run: |
-          echo "Skipping config drift check due to IPv6 compatibility issues"
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-
-      - name: Deploy Supabase migrations
-        run: |
-          # Skip direct database operations due to IPv6 compatibility issues
-          echo "Skipping Supabase migrations due to IPv6 compatibility issues"
-          echo "Consider purchasing the IPv4 addon from Supabase if direct database access is needed"
-
-          # Commenting out the original commands:
-          # supabase link --project-ref ${{ secrets.STAGING_PROJECT_ID }}
-          # supabase db push
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
+          echo "NOTICE: All Supabase database operations have been disabled"
+          echo "The GitHub Actions runner cannot connect to Supabase via IPv6"
+          echo "Consider purchasing the IPv4 addon from Supabase if database operations are needed in CI/CD"
 
       - name: Prepare Staging Configuration
         run: |
