@@ -34,9 +34,11 @@ jobs:
         with:
           version: latest
 
-      - name: Backup Database Before Migration
+      - name: Backup Database (Safety Measure)
         run: |
-          echo "Skipping database backup due to IPv6 compatibility issues"
+          echo "SKIPPING: Database backup due to IPv6 connectivity issues"
+          # This step is intentionally skipped to avoid IPv6 connection issues
+          exit 0
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
