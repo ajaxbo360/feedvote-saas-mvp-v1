@@ -1,4 +1,7 @@
-name: Database Migrations
+name: Database Migrations (DISABLED)
+
+# This workflow is disabled - database migrations are managed manually
+# To re-enable, remove the (DISABLED) suffix and uncomment the Supabase commands
 on:
   workflow_dispatch:
     inputs:

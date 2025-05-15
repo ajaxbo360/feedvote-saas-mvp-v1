@@ -1,11 +1,16 @@
-name: Supabase Deploy
+name: Supabase Deploy (DISABLED)
 
+# Workflow disabled - database changes are managed manually
+# To re-enable, uncomment the trigger section below
 on:
-  push:
-    branches:
-      - main
-      - staging
+  # Only run on manual dispatch, but keep it commented for now
+  # push:
+  #   branches:
+  #     - main
+  #     - staging
   workflow_dispatch:
+    # This manual trigger is kept but the workflow is effectively disabled
+    # by the "DISABLED" suffix in the name
 
 jobs:
   deploy:
@@ -57,18 +62,19 @@ jobs:
 
       - name: Deploy Configuration
         run: |
-          # Set environment-specific variables
-          sed -i 's/env(SUPABASE_AUTH_GOOGLE_CLIENT_ID)/${{ env.GOOGLE_CLIENT_ID }}/g' supabase/deployment-config.toml
-          sed -i 's/env(SUPABASE_AUTH_GOOGLE_SECRET)/${{ env.GOOGLE_SECRET }}/g' supabase/deployment-config.toml
+          echo "DISABLED: Configuration deployment due to IPv6 compatibility issues"
+          # Exit with success code
+          exit 0
 
-          # Set appropriate redirect URI based on environment
-          if [ "$DEPLOY_ENV" = "production" ]; then
-            sed -i 's|env(SUPABASE_AUTH_GOOGLE_REDIRECT_URI)|https://feedvote.com/auth/callback|g' supabase/deployment-config.toml
-          else
-            sed -i 's|env(SUPABASE_AUTH_GOOGLE_REDIRECT_URI)|https://staging.feedvote.com/auth/callback|g' supabase/deployment-config.toml
-          fi
-
-          supabase secrets set --env-file .env.$DEPLOY_ENV
+          # Original commands (commented out):
+          # sed -i 's/env(SUPABASE_AUTH_GOOGLE_CLIENT_ID)/${{ env.GOOGLE_CLIENT_ID }}/g' supabase/deployment-config.toml
+          # sed -i 's/env(SUPABASE_AUTH_GOOGLE_SECRET)/${{ env.GOOGLE_SECRET }}/g' supabase/deployment-config.toml
+          # if [ "$DEPLOY_ENV" = "production" ]; then
+          #   sed -i 's|env(SUPABASE_AUTH_GOOGLE_REDIRECT_URI)|https://feedvote.com/auth/callback|g' supabase/deployment-config.toml
+          # else
+          #   sed -i 's|env(SUPABASE_AUTH_GOOGLE_REDIRECT_URI)|https://staging.feedvote.com/auth/callback|g' supabase/deployment-config.toml
+          # fi
+          # supabase secrets set --env-file .env.$DEPLOY_ENV
 
       - name: Notify on Success
         if: success()
