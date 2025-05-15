@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/utils/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { getAuthRedirectUrl } from '@/utils/url-helper';
 import Image from 'next/image';
 
 interface Props {
@@ -14,11 +15,12 @@ export function GoogleLoginButton({ label }: Props) {
 
   const handleGoogleLogin = async () => {
     try {
+      console.log('Supabase URL being used:', process.env.NEXT_PUBLIC_SUPABASE_URL);
       const supabase = createClient();
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: getAuthRedirectUrl(),
         },
       });
 
