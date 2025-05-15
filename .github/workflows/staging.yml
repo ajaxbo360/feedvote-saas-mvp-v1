@@ -29,17 +29,11 @@ jobs:
         if: steps.node-modules-cache.outputs.cache-hit != 'true'
         run: npm ci
 
-      # TEMPORARILY REMOVED DUE TO IPv6 COMPATIBILITY ISSUES
-      # - name: Setup Supabase CLI
-      #  uses: supabase/setup-cli@v1
-      #  with:
-      #    version: latest
-
-      # Skip all Supabase database operations due to IPv6 incompatibility
+      # IMPORTANT NOTICE ABOUT DATABASE OPERATIONS
       - name: Database Operations Notice
         run: |
           echo "NOTICE: All Supabase database operations have been disabled"
-          echo "The GitHub Actions runner cannot connect to Supabase via IPv6"
+          echo "GitHub Actions runners cannot connect to Supabase via IPv6"
           echo "Consider purchasing the IPv4 addon from Supabase if database operations are needed in CI/CD"
 
       - name: Prepare Staging Configuration
