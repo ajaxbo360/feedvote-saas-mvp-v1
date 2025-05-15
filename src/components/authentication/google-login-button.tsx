@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { createClient } from '@/utils/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { getAuthRedirectUrl } from '@/utils/url-helper';
+import { getEnvironmentSpecificSupabaseUrl } from '@/utils/environment-helper';
 import Image from 'next/image';
 
 interface Props {
@@ -15,24 +16,56 @@ export function GoogleLoginButton({ label }: Props) {
 
   const handleGoogleLogin = async () => {
     try {
-      console.log('Supabase URL being used:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+      // Add extensive debug logging
+      console.log('=== GOOGLE LOGIN DEBUG ===');
+
+      // Log environment information
+      console.log('Window Location:', {
+        hostname: window.location.hostname,
+        origin: window.location.origin,
+        href: window.location.href,
+      });
+
+      // Log Supabase URL that will be used
+      const supabaseUrlToUse = getEnvironmentSpecificSupabaseUrl();
+      console.log('Supabase URL being used:', supabaseUrlToUse);
+      console.log('Env Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+
+      // Log redirect URL
+      const redirectUrl = getAuthRedirectUrl();
+      console.log('Auth Redirect URL:', redirectUrl);
+
+      console.log('=========================');
+
       const supabase = createClient();
-      const { error } = await supabase.auth.signInWithOAuth({
+      console.log('Starting OAuth flow with Supabase...');
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: getAuthRedirectUrl(),
+          redirectTo: redirectUrl,
+          queryParams: {
+            // Add a timestamp to prevent caching issues
+            _t: new Date().getTime().toString(),
+          },
         },
       });
 
       if (error) {
+        console.error('OAuth Error:', error);
         toast({
-          description: `Authentication error: ${error.message}`,
+          title: 'Authentication error',
+          description: error.message,
           variant: 'destructive',
         });
+      } else {
+        console.log('OAuth successful, redirecting to:', data?.url);
       }
-    } catch (error) {
+    } catch (err) {
+      console.error('Unexpected error during authentication:', err);
       toast({
-        description: 'Failed to connect to authentication service',
+        title: 'Authentication error',
+        description: 'An unexpected error occurred. Please try again.',
         variant: 'destructive',
       });
     }
