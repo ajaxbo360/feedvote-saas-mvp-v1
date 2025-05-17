@@ -12,9 +12,6 @@ export async function updateSession(request: NextRequest) {
   }
 
   try {
-    // Debug cookies before processing
-    console.log('updateSession - Cookies before:', [...request.cookies.getAll().map((c) => c.name)]);
-
     // Create a response that we'll use to set cookies on
     let supabaseResponse = NextResponse.next({
       request: {
@@ -31,8 +28,6 @@ export async function updateSession(request: NextRequest) {
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           cookiesToSet.forEach(({ name, value, options }) => {
-            // Log cookie being set
-            console.log(`Setting cookie ${name} with options:`, options);
             supabaseResponse.cookies.set(name, value, options);
           });
         },
@@ -44,15 +39,7 @@ export async function updateSession(request: NextRequest) {
     // issues with users being randomly logged out.
 
     // Get user data and refresh session if needed
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    // Log authentication status
-    console.log('updateSession - User authenticated:', !!user);
-
-    // Debug cookies after processing
-    console.log('updateSession - Cookies after:', [...supabaseResponse.cookies.getAll().map((c) => c.name)]);
+    await supabase.auth.getUser();
 
     return supabaseResponse;
   } catch (error) {

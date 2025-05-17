@@ -39,23 +39,6 @@ export function createClient() {
   const supabaseUrl = getEnvironmentSpecificSupabaseUrl() || process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  console.log('==== SUPABASE CLIENT CREATION ====');
-  console.log('Creating Supabase client with URL:', supabaseUrl);
-  console.log('Current hostname:', typeof window !== 'undefined' ? window.location.hostname : 'server-side');
-  console.log('Current origin:', typeof window !== 'undefined' ? window.location.origin : 'server-side');
-  console.log(
-    'Environment vars available:',
-    process.env.NEXT_PUBLIC_SUPABASE_URL ? 'NEXT_PUBLIC_SUPABASE_URL ✓' : 'NEXT_PUBLIC_SUPABASE_URL ✗',
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'NEXT_PUBLIC_SUPABASE_ANON_KEY ✓' : 'NEXT_PUBLIC_SUPABASE_ANON_KEY ✗',
-  );
-
-  // Check if the current URL contains an auth code (important for PKCE flow)
-  if (typeof window !== 'undefined') {
-    const hasAuthCode = window.location.href.includes('code=');
-    console.log('URL contains auth code:', hasAuthCode);
-  }
-  console.log('================================');
-
   if (!supabaseUrl || !supabaseAnonKey) {
     console.error('Supabase environment variables missing in browser client');
 
@@ -87,13 +70,6 @@ export function createClient() {
       detectSessionInUrl: true,
       persistSession: true,
       storage: dualStorage,
-    },
-    // Debug network requests
-    global: {
-      fetch: (...args) => {
-        console.log('Supabase fetch:', args[0]);
-        return fetch(...args);
-      },
     },
   });
 

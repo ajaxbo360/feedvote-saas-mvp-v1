@@ -23,8 +23,6 @@ export function AuthBridge() {
         const { data } = await supabase.auth.getSession();
 
         if (data.session) {
-          console.log('AuthBridge: User is authenticated');
-
           // Make sure user profile data is available in localStorage for UI components
           const userData = {
             id: data.session.user.id,
@@ -50,8 +48,6 @@ export function AuthBridge() {
             console.error('Error syncing auth state:', err);
           });
         } else {
-          console.log('AuthBridge: No active session found');
-
           // Clear user profile data if session is gone
           localStorage.removeItem('feedvote-user-profile');
         }

@@ -18,17 +18,6 @@ export async function POST(request: NextRequest) {
 
     // If authenticated, refresh the session to ensure cookies are set properly
     if (user) {
-      // Log debug info
-      console.log('Auth sync: User authenticated, refreshing session');
-
-      // Get all current cookies for debugging
-      const cookieStore = cookies();
-      const allCookies = cookieStore.getAll();
-      console.log(
-        'Auth sync: Current cookies:',
-        allCookies.map((c) => c.name),
-      );
-
       // Since the user is already authenticated, this won't create a new session
       // but will ensure cookies are set correctly
       const { error } = await supabase.auth.refreshSession();
@@ -37,13 +26,6 @@ export async function POST(request: NextRequest) {
         console.error('Auth sync: Error refreshing session:', error);
         return NextResponse.json({ success: false, error: 'Failed to refresh session' }, { status: 500 });
       }
-
-      // Get cookies after refresh for debugging
-      const afterCookies = cookies().getAll();
-      console.log(
-        'Auth sync: Cookies after refresh:',
-        afterCookies.map((c) => c.name),
-      );
 
       return NextResponse.json({ success: true, message: 'Auth state synchronized' });
     }

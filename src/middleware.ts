@@ -23,7 +23,6 @@ export async function middleware(request: NextRequest) {
 
     // Special handling for auth callback route - always allow
     if (request.nextUrl.pathname.startsWith('/auth/callback')) {
-      console.log('Auth callback route detected - bypassing authentication check');
       return NextResponse.next();
     }
 
@@ -34,12 +33,8 @@ export async function middleware(request: NextRequest) {
     const isProtectedRoute = request.nextUrl.pathname.startsWith('/app');
 
     if (isProtectedRoute) {
-      // Debug all cookies to see what's available
-      console.log('--- COOKIE DEBUG ---');
-      console.log('Request URL:', request.nextUrl.pathname);
       const allCookies = request.cookies.getAll();
       const cookieNames = allCookies.map((c) => c.name);
-      console.log('All cookies:', cookieNames);
 
       // Check for Supabase auth cookies with pattern matching
       // Supabase prefixes cookies with the project ID and may add indices
@@ -58,16 +53,10 @@ export async function middleware(request: NextRequest) {
       const authHeader = request.headers.get('x-supabase-auth') || '';
       const hasAuthHeader = authHeader.length > 0;
 
-      console.log('Has auth cookie:', hasAuthCookie);
-      console.log('Has auth header:', hasAuthHeader);
-
       if (!hasAuthCookie && !hasAuthHeader) {
-        console.log('No auth cookies or headers found, redirecting to home page');
         const redirectUrl = new URL('/', request.url);
         return NextResponse.redirect(redirectUrl);
       }
-
-      console.log('Auth cookies or headers found, proceeding to protected route');
     }
 
     return response;
