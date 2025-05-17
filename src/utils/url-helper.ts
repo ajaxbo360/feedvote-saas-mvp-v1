@@ -58,10 +58,22 @@ export function getBaseUrl(): string {
  * Ensures the correct URL is used for the current environment
  */
 export function getAuthRedirectUrl(path = '/auth/callback'): string {
+  // Always use absolute URLs for OAuth redirect
   const baseUrl = getBaseUrl();
+
   // Make sure path starts with a slash
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+
+  // Build the complete URL
   const redirectUrl = `${baseUrl}${normalizedPath}`;
+
+  // For localhost, ensure we're using whatever port the app is running on
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    const localhostUrl = `${window.location.origin}${normalizedPath}`;
+    console.log('getAuthRedirectUrl - using localhost URL:', localhostUrl);
+    return localhostUrl;
+  }
+
   console.log('getAuthRedirectUrl - final URL:', redirectUrl);
   return redirectUrl;
 }

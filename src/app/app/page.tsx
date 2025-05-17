@@ -27,6 +27,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { validation } from '@/utils/validation';
+import { getCsrfHeader } from '@/utils/csrf-protection';
 
 // App Header Component
 const AppHeader = () => {
@@ -178,27 +180,47 @@ const CreateProjectModal = ({
   const [projectName, setProjectName] = useState('');
   const [slug, setSlug] = useState('');
   const [loading, setLoading] = useState(false);
+  const [userEditedSlug, setUserEditedSlug] = useState(false);
   const supabase = createClient();
   const { toast } = useToast();
 
+  // Clear fields when modal is closed
   useEffect(() => {
-    // Auto-generate slug from name
-    if (projectName) {
-      setSlug(
-        projectName
-          .toLowerCase()
-          .replace(/\s+/g, '-')
-          .replace(/[^a-z0-9-]/g, ''),
-      );
-    } else {
+    if (!open) {
+      setProjectName('');
       setSlug('');
     }
-  }, [projectName]);
+  }, [open]);
+
+  const handleProjectNameChange = (e) => {
+    const value = e.target.value;
+    const sanitizedName = validation.name(value);
+    setProjectName(sanitizedName);
+
+    if (!userEditedSlug) {
+      setSlug(validation.slug(sanitizedName));
+    }
+  };
+
+  const handleSlugChange = (e) => {
+    setUserEditedSlug(true);
+    setSlug(validation.slug(e.target.value));
+  };
 
   const handleCreateProject = async () => {
-    if (!projectName || !slug) {
+    if (!validation.minLength(projectName, 3)) {
       toast({
-        description: 'Please provide both project name and slug',
+        title: 'Error',
+        description: 'Project name must be at least 3 characters long',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!validation.minLength(slug, 3)) {
+      toast({
+        title: 'Error',
+        description: 'Project slug must be at least 3 characters long',
         variant: 'destructive',
       });
       return;
@@ -206,6 +228,11 @@ const CreateProjectModal = ({
 
     setLoading(true);
     try {
+      const headers = {
+        'Content-Type': 'application/json',
+        ...getCsrfHeader(),
+      };
+
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -253,7 +280,8 @@ const CreateProjectModal = ({
       onOpenChange(false);
     } catch (error: any) {
       toast({
-        description: `Error creating project: ${error.message}`,
+        title: 'Error',
+        description: 'Failed to create project. Please try again.',
         variant: 'destructive',
       });
     } finally {
@@ -272,36 +300,36 @@ const CreateProjectModal = ({
         </DialogHeader>
         <div className="grid gap-6 py-6">
           <div className="grid grid-cols-4 items-center gap-6">
-            <Label htmlFor="project-name" className="text-right text-sm font-medium">
-              Project Name
+            <Label htmlFor="project-name" className="text-right text-sm font-medium flex items-center justify-end">
+              Project Name <span className="text-red-500 ml-1">*</span>
             </Label>
             <Input
               id="project-name"
               placeholder="Enter your project's name"
               value={projectName}
-              onChange={(e) => setProjectName(e.target.value)}
+              onChange={handleProjectNameChange}
               className="col-span-3 h-12 px-4"
+              required
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-6">
-            <Label htmlFor="project-slug" className="text-right text-sm font-medium">
-              Project Slug
+            <Label htmlFor="project-slug" className="text-right text-sm font-medium flex items-center justify-end">
+              Project Slug <span className="text-red-500 ml-1">*</span>
             </Label>
             <div className="col-span-3 space-y-3">
-              <Input
-                id="project-slug"
-                placeholder="your-project-slug"
-                value={slug}
-                onChange={(e) =>
-                  setSlug(
-                    e.target.value
-                      .toLowerCase()
-                      .replace(/\s+/g, '-')
-                      .replace(/[^a-z0-9-]/g, ''),
-                  )
-                }
-                className="h-12 px-4"
-              />
+              <div className="relative">
+                <Input
+                  id="project-slug"
+                  placeholder="your-project-slug"
+                  value={slug}
+                  onChange={handleSlugChange}
+                  className="h-12 px-4"
+                  required
+                />
+                <p className="text-xs mt-2 mb-3 pl-1 bg-gradient-to-r from-green-500 to-blue-500 bg-clip-text text-transparent font-medium">
+                  Auto-generated from project name. You can edit it if needed.
+                </p>
+              </div>
               <p className="text-xs text-muted-foreground pl-1">
                 URL: https://{slug || 'your-project-slug'}.feedvote.com/board
               </p>
