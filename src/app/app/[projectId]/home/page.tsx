@@ -13,6 +13,7 @@ interface PageProps {
 
 export default async function ProjectHomePage({ params }: PageProps) {
   const { projectId } = params;
+  const slug = projectId; // The URL param is actually the slug
   const supabase = await createClient();
 
   // Get the current user's session
@@ -25,17 +26,14 @@ export default async function ProjectHomePage({ params }: PageProps) {
     redirect('/login');
   }
 
-  // Get user data
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Fetch project by slug
+  const { data: project, error } = await supabase.from('projects').select('*').eq('slug', slug).single();
 
-  // In a real app, we'd fetch the project data and requests from Supabase
-  // For now, use mock data
-  const project = {
-    id: projectId,
-    name: 'xxx',
-  };
+  // If project not found, redirect to projects list
+  if (error || !project) {
+    console.error('Project not found:', error?.message || 'No project with this slug');
+    redirect('/app');
+  }
 
   // Mock feature requests data
   const pendingRequests = [
@@ -53,7 +51,7 @@ export default async function ProjectHomePage({ params }: PageProps) {
 
   return (
     <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-8">
-      <DashboardPageHeader pageTitle={`${project.name}`} />
+      <DashboardPageHeader pageTitle={project.name} />
 
       <div className="flex flex-col gap-4">
         <div className="py-2">

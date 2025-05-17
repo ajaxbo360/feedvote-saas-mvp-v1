@@ -4,8 +4,8 @@ import { createClient } from '@/utils/supabase/server';
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  // if "next" is in param, use it as the redirect URL, otherwise go to dashboard
-  const next = searchParams.get('next') ?? '/dashboard';
+  // if "next" is in param, use it as the redirect URL, otherwise go to app
+  const next = searchParams.get('next') ?? '/app';
 
   if (code) {
     const supabase = await createClient();
@@ -35,7 +35,7 @@ export async function GET(request: Request) {
             </script>
           </head>
           <body>
-            Redirecting to dashboard...
+            Redirecting to app...
           </body>
         </html>
       `;

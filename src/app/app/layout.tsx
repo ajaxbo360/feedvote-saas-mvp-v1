@@ -15,7 +15,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   } = await supabase.auth.getSession();
 
   if (!session) {
-    redirect('/login');
+    redirect('/');
   }
 
   return <div className="flex min-h-screen flex-col">{children}</div>;
