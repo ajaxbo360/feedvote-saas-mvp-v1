@@ -9,6 +9,11 @@ import { getEnvironmentSpecificSupabaseUrl } from '@/utils/environment-helper';
 class DualStorage {
   getItem(key: string) {
     try {
+      // For Supabase auth cookies, don't try to parse them as JSON
+      if (key.includes('auth-token-code-verifier')) {
+        // Return raw value without parsing
+        return localStorage.getItem(key);
+      }
       return localStorage.getItem(key);
     } catch (error) {
       console.error('Error getting item from localStorage:', error);

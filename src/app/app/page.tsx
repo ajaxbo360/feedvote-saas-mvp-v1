@@ -30,6 +30,7 @@ import {
 import { validation } from '@/utils/validation';
 import { getCsrfHeader } from '@/utils/csrf-protection';
 import { AppHeader } from '@/components/app/app-header';
+import { useOnboarding } from '@/providers/OnboardingProvider';
 
 // Project Interface
 interface Project {
@@ -561,24 +562,12 @@ const ProjectList = () => {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const supabase = createClient();
   const { toast } = useToast();
+  const { setStepCompleted, currentStepId } = useOnboarding() as any;
 
   const fetchProjects = async () => {
-    setLoading(true);
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        setProjects([]);
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from('projects')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+      setLoading(true);
+      const { data, error } = await supabase.from('projects').select('*').order('created_at', { ascending: false });
 
       if (error) {
         throw error;
@@ -586,15 +575,13 @@ const ProjectList = () => {
 
       setProjects(data || []);
     } catch (error: any) {
+      console.error('Error fetching projects:', error.message);
       toast({
-        description: `Error fetching projects: ${error.message}`,
+        description: `Failed to fetch projects: ${error.message}`,
         variant: 'destructive',
       });
     } finally {
-      // Intentionally delay to show the skeleton for at least 1 second
-      setTimeout(() => {
-        setLoading(false);
-      }, 1000);
+      setLoading(false);
     }
   };
 
@@ -604,6 +591,12 @@ const ProjectList = () => {
 
   const handleProjectCreated = (project: Project) => {
     setProjects([project, ...projects]);
+
+    // If in the create_project onboarding step, mark it as completed
+    if (currentStepId === 'create_project') {
+      console.log('[ProjectList] 🎯 Marking create_project step as completed');
+      setStepCompleted('create_project', { project_id: project.id });
+    }
   };
 
   const handleProjectDeleted = (projectId: string) => {
@@ -646,7 +639,7 @@ const ProjectList = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Create Project Card */}
           <Card
-            className="overflow-hidden border-2 border-dashed border-border bg-card/20 flex flex-col h-full cursor-pointer hover:border-teal-500/50 hover:scale-105 transition-all duration-200"
+            className="create-project-button overflow-hidden border-2 border-dashed border-border bg-card/20 flex flex-col h-full cursor-pointer hover:border-teal-500/50 hover:scale-105 transition-all duration-200"
             onClick={() => setCreateModalOpen(true)}
           >
             <div className="flex items-center justify-center h-full p-6">

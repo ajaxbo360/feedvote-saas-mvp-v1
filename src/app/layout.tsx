@@ -7,6 +7,7 @@ import { ReactNode } from 'react';
 import type { Metadata } from 'next';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/ui/theme-provider';
+import { OnboardingProvider } from '@/providers/OnboardingProvider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -95,7 +96,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} min-h-screen bg-background antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          {children}
+          <OnboardingProvider>{children}</OnboardingProvider>
           <Toaster />
         </ThemeProvider>
       </body>
