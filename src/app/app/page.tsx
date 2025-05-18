@@ -562,7 +562,7 @@ const ProjectList = () => {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const supabase = createClient();
   const { toast } = useToast();
-  const { setStepCompleted, currentStepId } = useOnboarding() as any;
+  const { setStepCompleted, currentStepId, setCurrentStep } = useOnboarding() as any;
 
   const fetchProjects = async () => {
     try {
@@ -591,11 +591,17 @@ const ProjectList = () => {
 
   const handleProjectCreated = async (project: Project) => {
     setProjects([project, ...projects]);
+    setCreateModalOpen(false);
 
-    // If in the create_project onboarding step, mark it as completed
+    // If in the create_project onboarding step, mark it as completed and show success
     if (currentStepId === 'create_project') {
       console.log('[ProjectList] 🎯 Marking create_project step as completed');
       await setStepCompleted('create_project', { project_id: project.id });
+
+      // Wait a bit before transitioning to show the success celebration
+      setTimeout(async () => {
+        await setCurrentStep('dashboard_tour');
+      }, 500);
     }
   };
 

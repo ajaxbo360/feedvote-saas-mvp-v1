@@ -45,6 +45,18 @@ export const OnboardingOverlay = () => {
     console.log('[OnboardingOverlay] Current step:', currentStepId);
   }, [currentStepId]);
 
+  // Handle success celebration when transitioning to dashboard_tour
+  useEffect(() => {
+    if (currentStepId === 'dashboard_tour') {
+      setSuccessMessage({
+        title: 'Project Created!',
+        message: "Great job! You've created your first project. Now let's explore your dashboard.",
+        actionText: 'Continue to Dashboard',
+      });
+      setShowSuccessCelebration(true);
+    }
+  }, [currentStepId]);
+
   // Determine which component to show based on current step
   const renderCurrentStep = () => {
     console.log('[OnboardingOverlay] Rendering step:', currentStepId);
@@ -57,7 +69,10 @@ export const OnboardingOverlay = () => {
               await setStepCompleted('welcome');
               await setCurrentStep('create_project');
             }}
-            onSkip={() => setStepCompleted('welcome')}
+            onSkip={async () => {
+              await setStepCompleted('welcome');
+              await completeOnboarding();
+            }}
           />
         );
 
@@ -66,17 +81,13 @@ export const OnboardingOverlay = () => {
           <ProjectCreationTooltip
             targetSelector=".create-project-button"
             onComplete={async () => {
-              await setStepCompleted('create_project');
-              setSuccessMessage({
-                title: 'Project Created!',
-                message: "Great job! You've created your first project. Now let's explore your dashboard.",
-                actionText: 'Continue to Dashboard',
-              });
-              setShowSuccessCelebration(true);
+              // Just open the create project modal
+              const createProjectButton = document.querySelector('.create-project-button') as HTMLElement;
+              createProjectButton?.click();
             }}
             onSkip={async () => {
               await setStepCompleted('create_project');
-              await setCurrentStep('dashboard_tour');
+              await completeOnboarding();
             }}
           />
         );

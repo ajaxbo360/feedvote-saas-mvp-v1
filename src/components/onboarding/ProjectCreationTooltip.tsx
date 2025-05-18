@@ -1,13 +1,12 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useWindowSize } from '@/hooks/useWindowSize';
 
 interface ProjectCreationTooltipProps {
   targetSelector: string;
-  onComplete?: () => void;
-  onSkip?: () => void;
+  onComplete?: () => Promise<void>;
+  onSkip?: () => Promise<void>;
 }
 
 /**
@@ -18,130 +17,92 @@ interface ProjectCreationTooltipProps {
  * and includes animations for entrance and exit.
  */
 export const ProjectCreationTooltip = ({ targetSelector, onComplete, onSkip }: ProjectCreationTooltipProps) => {
-  const [position, setPosition] = useState({ top: 0, left: 0 });
+  const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
   const [isVisible, setIsVisible] = useState(false);
-  const tooltipRef = useRef<HTMLDivElement>(null);
-  const { width: windowWidth } = useWindowSize();
 
-  // Calculate position relative to target element
   useEffect(() => {
-    const calculatePosition = () => {
-      const targetElement = document.querySelector(targetSelector) as HTMLElement;
+    const updatePosition = () => {
+      const targetElement = document.querySelector(targetSelector);
+      if (targetElement) {
+        const rect = targetElement.getBoundingClientRect();
+        const tooltipHeight = 120; // Approximate height of tooltip
+        const spacing = 16; // Space between tooltip and target
 
-      if (!targetElement || !tooltipRef.current) return;
+        setPosition({
+          top: window.scrollY + rect.top - tooltipHeight - spacing,
+          left: rect.left + rect.width / 2,
+          width: rect.width,
+        });
 
-      const targetRect = targetElement.getBoundingClientRect();
-      const tooltipRect = tooltipRef.current.getBoundingClientRect();
+        // Add highlight effect to the card with a pulsing animation
+        targetElement.classList.add(
+          'ring-2',
+          'ring-teal-500',
+          'ring-offset-2',
+          'ring-offset-background',
+          'animate-pulse',
+        );
 
-      // Position the tooltip above the target element
-      let top = targetRect.top - tooltipRect.height - 12;
-      let left = targetRect.left + targetRect.width / 2 - tooltipRect.width / 2;
-
-      // Keep tooltip within viewport bounds
-      if (left < 20) left = 20;
-      if (left + tooltipRect.width > windowWidth - 20) {
-        left = windowWidth - tooltipRect.width - 20;
+        // Show tooltip after a small delay to ensure smooth animation
+        setTimeout(() => setIsVisible(true), 100);
       }
-
-      // If tooltip would appear above viewport, place it below the target
-      if (top < 20) {
-        top = targetRect.bottom + 12;
-      }
-
-      setPosition({ top, left });
     };
 
-    // Calculate initial position after a short delay to allow DOM to be ready
-    const timer = setTimeout(() => {
-      calculatePosition();
-      setIsVisible(true);
-    }, 500);
+    // Initial position
+    updatePosition();
 
-    // Recalculate on window resize
-    window.addEventListener('resize', calculatePosition);
+    // Update position on resize and scroll
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition);
 
+    // Cleanup
     return () => {
-      clearTimeout(timer);
-      window.removeEventListener('resize', calculatePosition);
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition);
+      const targetElement = document.querySelector(targetSelector);
+      if (targetElement) {
+        targetElement.classList.remove(
+          'ring-2',
+          'ring-teal-500',
+          'ring-offset-2',
+          'ring-offset-background',
+          'animate-pulse',
+        );
+      }
     };
-  }, [targetSelector, windowWidth]);
+  }, [targetSelector]);
 
-  // Animation variants
-  const tooltipVariants = {
-    hidden: { opacity: 0, y: 10, scale: 0.95 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: {
-        type: 'spring',
-        damping: 20,
-        stiffness: 300,
-      },
-    },
-    exit: {
-      opacity: 0,
-      y: 10,
-      scale: 0.95,
-      transition: { duration: 0.2 },
-    },
-  };
-
-  const handleSkip = () => {
-    setIsVisible(false);
-    onSkip?.();
-  };
-
-  const handleComplete = () => {
-    setIsVisible(false);
-    onComplete?.();
-  };
+  if (!isVisible) return null;
 
   return (
     <AnimatePresence>
-      {isVisible && (
-        <motion.div
-          ref={tooltipRef}
-          className="fixed z-50 w-64 bg-card text-card-foreground rounded-lg shadow-lg border border-border p-4"
-          style={{
-            top: position.top,
-            left: position.left,
-          }}
-          variants={tooltipVariants}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-        >
-          {/* Tooltip arrow */}
-          <div className="absolute w-4 h-4 bg-card border-l border-t border-border transform rotate-45 -bottom-2 left-1/2 -translate-x-1/2" />
-
-          {/* Content */}
-          <div className="text-center">
-            <h4 className="font-semibold text-foreground text-base mb-2">Create your first project</h4>
-            <p className="text-muted-foreground text-sm mb-4">Click here to set up your first feedback board</p>
-
-            {/* Actions */}
-            <div className="flex justify-between">
-              <motion.button
-                onClick={handleSkip}
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Skip
-              </motion.button>
-              <motion.button
-                onClick={handleComplete}
-                className="text-xs bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white px-3 py-1 rounded"
-                whileHover={{ scale: 1.05, boxShadow: '0px 3px 8px rgba(0, 0, 0, 0.1)' }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Got it
-              </motion.button>
-            </div>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        className="fixed z-50 transform -translate-x-1/2"
+        style={{ top: position.top, left: position.left }}
+      >
+        <div className="bg-popover text-popover-foreground p-4 rounded-lg shadow-lg max-w-xs">
+          <div className="text-sm font-medium mb-2">Create your first project</div>
+          <p className="text-sm text-muted-foreground mb-4">Click here to set up your first feedback board</p>
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={() => onSkip?.()}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Skip
+            </button>
+            <button
+              onClick={() => onComplete?.()}
+              className="text-sm bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 text-white px-3 py-1 rounded-md"
+            >
+              Got it
+            </button>
           </div>
-        </motion.div>
-      )}
+        </div>
+        <div className="w-3 h-3 bg-popover rotate-45 absolute left-1/2 -bottom-1.5 -translate-x-1/2" />
+      </motion.div>
     </AnimatePresence>
   );
 };
