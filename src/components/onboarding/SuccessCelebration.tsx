@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
+import { Button } from '@/components/ui/button';
 
 interface SuccessCelebrationProps {
   title?: string;
@@ -106,49 +107,21 @@ export const SuccessCelebration = ({
     onAction?.();
   };
 
-  // Animation variants
-  const overlayVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 0.3 } },
-    exit: { opacity: 0, transition: { duration: 0.3 } },
-  };
-
-  const cardVariants = {
-    hidden: { scale: 0.8, opacity: 0, y: 20 },
-    visible: {
-      scale: 1,
-      opacity: 1,
-      y: 0,
-      transition: {
-        type: 'spring',
-        damping: 25,
-        stiffness: 300,
-      },
-    },
-    exit: {
-      scale: 0.8,
-      opacity: 0,
-      y: 20,
-      transition: { duration: 0.2 },
-    },
-  };
-
   return (
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-          variants={overlayVariants}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
         >
           <motion.div
-            className="bg-card text-card-foreground rounded-lg shadow-xl max-w-sm w-full mx-4 overflow-hidden border border-border"
-            variants={cardVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-sm w-full mx-4 overflow-hidden"
+            initial={{ scale: 0.9, y: 20, opacity: 0 }}
+            animate={{ scale: 1, y: 0, opacity: 1 }}
+            exit={{ scale: 0.9, y: 20, opacity: 0 }}
+            transition={{ type: 'spring', duration: 0.5 }}
           >
             {/* Success Icon */}
             <div className="flex justify-center pt-8">
@@ -176,19 +149,18 @@ export const SuccessCelebration = ({
             </div>
 
             {/* Content */}
-            <div className="px-6 pt-4 pb-8 text-center">
-              <h3 className="text-xl font-bold mb-2">{title}</h3>
-              <p className="text-muted-foreground mb-6">{message}</p>
+            <div className="px-6 pt-6 pb-8 text-center">
+              <h3 className="text-2xl font-bold mb-2 dark:text-white">{title}</h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-6">{message}</p>
 
               {/* Action button */}
-              <motion.button
+              <Button
                 onClick={handleAction}
-                className="px-5 py-2 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white rounded-md transition-colors shadow-md"
-                whileHover={{ scale: 1.05, boxShadow: '0px 5px 15px rgba(0, 0, 0, 0.1)' }}
-                whileTap={{ scale: 0.98 }}
+                className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white"
+                size="lg"
               >
                 {actionText}
-              </motion.button>
+              </Button>
             </div>
           </motion.div>
         </motion.div>

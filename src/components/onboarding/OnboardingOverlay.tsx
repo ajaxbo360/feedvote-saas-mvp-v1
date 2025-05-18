@@ -19,6 +19,8 @@ interface SuccessMessageType {
   title: string;
   message: string;
   actionText: string;
+  projectName?: string;
+  projectSlug?: string;
 }
 
 /**
@@ -45,15 +47,16 @@ export const OnboardingOverlay = () => {
     console.log('[OnboardingOverlay] Current step:', currentStepId);
   }, [currentStepId]);
 
-  // Handle success celebration when transitioning to dashboard_tour
+  // Handle success celebration when project is created
   useEffect(() => {
     if (currentStepId === 'dashboard_tour') {
-      setSuccessMessage({
-        title: 'Project Created!',
-        message: "Great job! You've created your first project. Now let's explore your dashboard.",
-        actionText: 'Continue to Dashboard',
-      });
+      console.log('[OnboardingOverlay] 🎉 Showing success celebration');
       setShowSuccessCelebration(true);
+      setSuccessMessage({
+        title: 'Project Created Successfully! 🎉',
+        message: "Great job! You've created your first project. Now let's explore your dashboard.",
+        actionText: 'Got it',
+      });
     }
   }, [currentStepId]);
 
@@ -140,9 +143,30 @@ export const OnboardingOverlay = () => {
     }
   };
 
+  // Handle success celebration completion
+  const handleSuccessCelebrationComplete = async () => {
+    console.log('[OnboardingOverlay] 🎯 Success celebration complete, transitioning to welcome');
+    setShowSuccessCelebration(false);
+    // Add a small delay before showing welcome modal
+    setTimeout(async () => {
+      await setCurrentStep('welcome');
+    }, 100);
+  };
+
   return (
     <>
       {renderCurrentStep()}
+
+      {showSuccessCelebration && (
+        <SuccessCelebration
+          title={successMessage.title}
+          message={successMessage.message}
+          actionText={successMessage.actionText}
+          onComplete={handleSuccessCelebrationComplete}
+          onAction={handleSuccessCelebrationComplete}
+          duration={0} // Disable auto-dismiss
+        />
+      )}
 
       {runJoyride && (
         <Joyride
@@ -157,18 +181,6 @@ export const OnboardingOverlay = () => {
               textColor: theme === 'dark' ? '#ffffff' : '#1f2937',
               backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
             },
-          }}
-        />
-      )}
-
-      {showSuccessCelebration && (
-        <SuccessCelebration
-          title={successMessage.title}
-          message={successMessage.message}
-          actionText={successMessage.actionText}
-          onComplete={() => {
-            setShowSuccessCelebration(false);
-            setCurrentStep('dashboard_tour');
           }}
         />
       )}

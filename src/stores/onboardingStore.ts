@@ -332,56 +332,66 @@ export const useOnboardingStore = create<OnboardingState>((set, get) => ({
   completeOnboarding: async () => {
     const supabase = createClientComponentClient();
 
-    set({
-      isEnabled: false,
-      isCompleted: true,
-    });
-
-    // Clean up persistent state if it exists
-    if (typeof window !== 'undefined') {
-      const forcedState = localStorage.getItem('onboarding-state');
-      if (forcedState) {
-        try {
-          const parsedState = JSON.parse(forcedState);
-          if (parsedState.persistent) {
-            console.log('[OnboardingStore] 🧹 Removing persistent state from localStorage');
-            localStorage.removeItem('onboarding-state');
-          }
-        } catch (e) {
-          console.error('[OnboardingStore] ❌ Error cleaning up persistent state:', e);
-        }
-      }
-    }
-
     try {
-      // Mark as completed in Supabase
-      const { error } = await supabase.rpc('complete_onboarding');
+      // First try the RPC call
+      const { error: rpcError } = await supabase.rpc('complete_onboarding');
 
-      if (error) {
-        console.error('[OnboardingStore] ❌ Error completing onboarding via RPC:', error);
+      if (rpcError) {
+        console.error('[OnboardingStore] ❌ Error completing onboarding via RPC:', rpcError);
 
         // Fallback: Try to update the profile directly
         const {
           data: { user },
         } = await supabase.auth.getUser();
-        if (user) {
-          const now = new Date().toISOString();
-          await supabase
-            .from('profiles')
-            .update({
-              onboarding_completed_at: now,
-              onboarding_status: {
-                completed: true,
-                current_step: 'completed',
-                completed_at: now,
-              },
-            })
-            .eq('id', user.id);
 
-          console.log('[OnboardingStore] ✅ Onboarding completed via direct profile update');
+        if (!user) {
+          console.error('[OnboardingStore] ❌ No user found for fallback update');
+          return;
         }
+
+        const now = new Date().toISOString();
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            onboarding_completed_at: now,
+            onboarding_status: {
+              completed: true,
+              current_step: 'completed',
+              completed_at: now,
+            },
+          })
+          .eq('id', user.id);
+
+        if (updateError) {
+          console.error('[OnboardingStore] ❌ Error in fallback profile update:', updateError);
+          return;
+        }
+
+        console.log('[OnboardingStore] ✅ Onboarding completed via direct profile update');
       } else {
         console.log('[OnboardingStore] ✅ Onboarding completed successfully via RPC');
+      }
+
+      // Only update local state after successful Supabase update
+      set({
+        isEnabled: false,
+        isCompleted: true,
+      });
+
+      // Clean up persistent state if it exists
+      if (typeof window !== 'undefined') {
+        const forcedState = localStorage.getItem('onboarding-state');
+        if (forcedState) {
+          try {
+            const parsedState = JSON.parse(forcedState);
+            if (parsedState.persistent) {
+              console.log('[OnboardingStore] 🧹 Removing persistent state from localStorage');
+              localStorage.removeItem('onboarding-state');
+            }
+          } catch (e) {
+            console.error('[OnboardingStore] ❌ Error cleaning up persistent state:', e);
+          }
+        }
       }
     } catch (err) {
       console.error('[OnboardingStore] 💥 Error in completeOnboarding:', err);

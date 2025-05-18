@@ -598,10 +598,8 @@ const ProjectList = () => {
       console.log('[ProjectList] 🎯 Marking create_project step as completed');
       await setStepCompleted('create_project', { project_id: project.id });
 
-      // Wait a bit before transitioning to show the success celebration
-      setTimeout(async () => {
-        await setCurrentStep('dashboard_tour');
-      }, 500);
+      // Transition to dashboard tour which will trigger success celebration
+      await setCurrentStep('dashboard_tour');
     }
   };
 
