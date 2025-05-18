@@ -589,13 +589,13 @@ const ProjectList = () => {
     fetchProjects();
   }, [supabase]);
 
-  const handleProjectCreated = (project: Project) => {
+  const handleProjectCreated = async (project: Project) => {
     setProjects([project, ...projects]);
 
     // If in the create_project onboarding step, mark it as completed
     if (currentStepId === 'create_project') {
       console.log('[ProjectList] 🎯 Marking create_project step as completed');
-      setStepCompleted('create_project', { project_id: project.id });
+      await setStepCompleted('create_project', { project_id: project.id });
     }
   };
 

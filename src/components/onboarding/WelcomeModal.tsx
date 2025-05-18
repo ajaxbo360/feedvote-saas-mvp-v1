@@ -20,6 +20,7 @@ interface WelcomeModalProps {
 interface OnboardingContextType {
   setStepCompleted: (stepId: string, metadata?: Record<string, any>) => Promise<void>;
   skipOnboarding: () => Promise<void>;
+  setCurrentStep: (stepId: string) => Promise<void>;
 }
 
 /**
@@ -30,7 +31,7 @@ interface OnboardingContextType {
  * It includes animations and respects the user's theme preference.
  */
 export const WelcomeModal = ({ onStart, onSkip }: WelcomeModalProps) => {
-  const { setStepCompleted, skipOnboarding } = useOnboarding() as OnboardingContextType;
+  const { setStepCompleted, skipOnboarding, setCurrentStep } = useOnboarding() as OnboardingContextType;
   const [isOpen, setIsOpen] = useState(true);
   const [hasStarted, setHasStarted] = useState(false);
 
@@ -39,16 +40,20 @@ export const WelcomeModal = ({ onStart, onSkip }: WelcomeModalProps) => {
     setHasStarted(true);
 
     try {
-      // Mark the welcome step as completed
+      // First mark the welcome step as completed
       await setStepCompleted('welcome', {
         action: 'started',
         timestamp: new Date().toISOString(),
       });
 
+      // Then transition to the next step
+      await setCurrentStep('create_project');
+
       setIsOpen(false);
       onStart?.();
     } catch (error) {
       console.error('[WelcomeModal] Error starting onboarding:', error);
+      setHasStarted(false);
     }
   };
 

@@ -8,6 +8,19 @@ import { ProjectCreationTooltip } from './ProjectCreationTooltip';
 import { SuccessCelebration } from './SuccessCelebration';
 import { useTheme } from 'next-themes';
 
+interface OnboardingContextType {
+  currentStepId: string | null;
+  setStepCompleted: (stepId: string, metadata?: Record<string, any>) => Promise<void>;
+  completeOnboarding: () => Promise<void>;
+  setCurrentStep: (stepId: string) => Promise<void>;
+}
+
+interface SuccessMessageType {
+  title: string;
+  message: string;
+  actionText: string;
+}
+
 /**
  * The OnboardingOverlay component is responsible for managing the
  * visibility of different onboarding components based on the current step.
@@ -15,29 +28,45 @@ import { useTheme } from 'next-themes';
  * It manages both modals and guided tours using Joyride.
  */
 export const OnboardingOverlay = () => {
-  const { currentStepId, setStepCompleted, completeOnboarding } = useOnboarding();
+  const { currentStepId, setStepCompleted, completeOnboarding, setCurrentStep } =
+    useOnboarding() as OnboardingContextType;
   const [joyrideSteps, setJoyrideSteps] = useState<Step[]>([]);
   const [runJoyride, setRunJoyride] = useState(false);
   const [showSuccessCelebration, setShowSuccessCelebration] = useState(false);
-  const [successMessage, setSuccessMessage] = useState({
+  const [successMessage, setSuccessMessage] = useState<SuccessMessageType>({
     title: 'Success!',
     message: "You've completed this step successfully.",
     actionText: 'Continue',
   });
   const { theme } = useTheme();
 
+  // Log current step for debugging
+  useEffect(() => {
+    console.log('[OnboardingOverlay] Current step:', currentStepId);
+  }, [currentStepId]);
+
   // Determine which component to show based on current step
   const renderCurrentStep = () => {
+    console.log('[OnboardingOverlay] Rendering step:', currentStepId);
+
     switch (currentStepId) {
       case 'welcome':
-        return <WelcomeModal onStart={() => setStepCompleted('welcome')} onSkip={() => setStepCompleted('welcome')} />;
+        return (
+          <WelcomeModal
+            onStart={async () => {
+              await setStepCompleted('welcome');
+              await setCurrentStep('create_project');
+            }}
+            onSkip={() => setStepCompleted('welcome')}
+          />
+        );
 
       case 'create_project':
         return (
           <ProjectCreationTooltip
             targetSelector=".create-project-button"
-            onComplete={() => {
-              setStepCompleted('create_project');
+            onComplete={async () => {
+              await setStepCompleted('create_project');
               setSuccessMessage({
                 title: 'Project Created!',
                 message: "Great job! You've created your first project. Now let's explore your dashboard.",
@@ -45,7 +74,10 @@ export const OnboardingOverlay = () => {
               });
               setShowSuccessCelebration(true);
             }}
-            onSkip={() => setStepCompleted('create_project')}
+            onSkip={async () => {
+              await setStepCompleted('create_project');
+              await setCurrentStep('dashboard_tour');
+            }}
           />
         );
 
@@ -54,6 +86,7 @@ export const OnboardingOverlay = () => {
         return null;
 
       default:
+        console.log('[OnboardingOverlay] Unknown step:', currentStepId);
         return null;
     }
   };
@@ -83,78 +116,51 @@ export const OnboardingOverlay = () => {
 
   // Handle Joyride callbacks
   const handleJoyrideCallback = (data: CallBackProps) => {
-    const { status } = data;
+    const { status, type, index } = data;
 
-    // Check if tour is finished or skipped
+    if (type === 'step:after' && index === joyrideSteps.length - 1) {
+      setStepCompleted('dashboard_tour');
+      completeOnboarding();
+    }
+
     if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
       setRunJoyride(false);
-      setStepCompleted('dashboard_tour');
-
-      // Show completion celebration when all steps are done
-      setSuccessMessage({
-        title: 'Onboarding Complete!',
-        message: "You're all set up and ready to start collecting feedback with Feedvote.",
-        actionText: 'Get Started',
-      });
-      setShowSuccessCelebration(true);
+      completeOnboarding();
     }
-  };
-
-  const handleOnboardingComplete = () => {
-    completeOnboarding();
   };
 
   return (
     <>
-      {/* Render the appropriate component for the current step */}
       {renderCurrentStep()}
 
-      {/* Success celebration for completing steps */}
+      {runJoyride && (
+        <Joyride
+          steps={joyrideSteps}
+          continuous
+          showProgress
+          showSkipButton
+          callback={handleJoyrideCallback}
+          styles={{
+            options: {
+              primaryColor: theme === 'dark' ? '#2dd4bf' : '#0ea5e9',
+              textColor: theme === 'dark' ? '#ffffff' : '#1f2937',
+              backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
+            },
+          }}
+        />
+      )}
+
       {showSuccessCelebration && (
         <SuccessCelebration
           title={successMessage.title}
           message={successMessage.message}
           actionText={successMessage.actionText}
-          onComplete={handleOnboardingComplete}
-          onAction={handleOnboardingComplete}
+          onComplete={() => {
+            setShowSuccessCelebration(false);
+            setCurrentStep('dashboard_tour');
+          }}
         />
       )}
-
-      {/* Joyride tour */}
-      <Joyride
-        run={runJoyride}
-        steps={joyrideSteps}
-        continuous
-        showSkipButton
-        callback={handleJoyrideCallback}
-        styles={{
-          options: {
-            primaryColor: theme === 'dark' ? '#4ade80' : '#16a34a',
-            textColor: theme === 'dark' ? '#f8fafc' : '#0f172a',
-            backgroundColor: theme === 'dark' ? '#0f172a' : '#ffffff',
-            arrowColor: theme === 'dark' ? '#0f172a' : '#ffffff',
-            overlayColor: 'rgba(0, 0, 0, 0.5)',
-          },
-          tooltip: {
-            fontSize: '14px',
-            padding: '12px',
-            borderRadius: '8px',
-            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.15)',
-          },
-          buttonNext: {
-            backgroundColor: theme === 'dark' ? '#4ade80' : '#16a34a',
-            fontSize: '14px',
-            padding: '8px 16px',
-          },
-          buttonBack: {
-            color: theme === 'dark' ? '#f8fafc' : '#0f172a',
-            marginRight: '8px',
-          },
-          buttonSkip: {
-            color: theme === 'dark' ? '#f8fafc' : '#0f172a',
-          },
-        }}
-      />
     </>
   );
 };
