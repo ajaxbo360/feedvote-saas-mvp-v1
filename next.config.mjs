@@ -1,5 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Enable SWC compiler
+  swcMinify: true,
+
+  // Disable Babel
+  experimental: {
+    forceSwcTransforms: true,
+  },
+
   images: {
     domains: ['cdn.simpleicons.org', 'localhost', 'paddle-billing.vercel.app'],
   },

@@ -1,4 +1,3 @@
-import { Inter } from 'next/font/google';
 import './globals.css';
 import '../styles/layout.css';
 import '../styles/theme-fixes.css';
@@ -8,8 +7,6 @@ import type { Metadata } from 'next';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/ui/theme-provider';
 import { OnboardingProvider } from '@/providers/OnboardingProvider';
-
-const inter = Inter({ subsets: ['latin'] });
 
 // Dynamically set the base URL based on environment
 const getBaseUrl = () => {
@@ -91,10 +88,14 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="canonical" href={getBaseUrl()} />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
         <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
       </head>
-      <body className={`${inter.className} min-h-screen bg-background antialiased`}>
+      <body className="min-h-screen bg-background antialiased font-inter">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <OnboardingProvider>{children}</OnboardingProvider>
           <Toaster />

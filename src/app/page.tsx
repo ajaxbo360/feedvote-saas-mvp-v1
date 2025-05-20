@@ -109,6 +109,26 @@ export default function Home() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <LandingPage />
+      {/* Widget Script */}
+      <script src="/widget/feedvote.min.js" async />
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+          window.addEventListener('load', function() {
+            if (typeof FeedVote !== 'undefined') {
+              new FeedVote({
+                projectId: 'demo-project',
+                position: 'bottom-right',
+                theme: 'light',
+                primaryColor: '#22c55e',
+                buttonText: 'Give Feedback',
+                customClass: 'landing-widget'
+              });
+            }
+          });
+        `,
+        }}
+      />
     </>
   );
 }
