@@ -567,13 +567,46 @@ const ProjectList = () => {
   const fetchProjects = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase.from('projects').select('*').order('created_at', { ascending: false });
+
+      // Get the current user first
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError) {
+        console.error('Error getting current user:', userError.message);
+        toast({
+          description: 'Unable to authenticate user. Please try signing in again.',
+          variant: 'destructive',
+        });
+        setLoading(false);
+        return;
+      }
+
+      if (!user) {
+        console.error('No authenticated user found');
+        toast({
+          description: 'You must be logged in to view projects',
+          variant: 'destructive',
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Only fetch projects belonging to the current user
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('user_id', user.id) // Filter by current user's ID
+        .order('created_at', { ascending: false });
 
       if (error) {
         throw error;
       }
 
       setProjects(data || []);
+      console.log('Fetched projects for user:', user.id, 'count:', data?.length);
     } catch (error: any) {
       console.error('Error fetching projects:', error.message);
       toast({
