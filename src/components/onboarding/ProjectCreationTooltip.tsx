@@ -5,18 +5,26 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 interface ProjectCreationTooltipProps {
   targetSelector: string;
+  title?: string;
+  description?: string;
   onComplete?: () => Promise<void>;
   onSkip?: () => Promise<void>;
 }
 
 /**
- * A tooltip component that highlights the project creation button
- * and guides users to create their first project.
+ * A tooltip component that highlights a target element
+ * and guides users through onboarding steps.
  *
  * It automatically positions itself near the target element
  * and includes animations for entrance and exit.
  */
-export const ProjectCreationTooltip = ({ targetSelector, onComplete, onSkip }: ProjectCreationTooltipProps) => {
+export const ProjectCreationTooltip = ({
+  targetSelector,
+  title = 'Create your first project',
+  description = 'Click here to set up your first feedback board',
+  onComplete,
+  onSkip,
+}: ProjectCreationTooltipProps) => {
   const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
   const [isVisible, setIsVisible] = useState(false);
 
@@ -84,8 +92,8 @@ export const ProjectCreationTooltip = ({ targetSelector, onComplete, onSkip }: P
         style={{ top: position.top, left: position.left }}
       >
         <div className="bg-popover text-popover-foreground p-4 rounded-lg shadow-lg max-w-xs">
-          <div className="text-sm font-medium mb-2">Create your first project</div>
-          <p className="text-sm text-muted-foreground mb-4">Click here to set up your first feedback board</p>
+          <div className="text-sm font-medium mb-2">{title}</div>
+          <p className="text-sm text-muted-foreground mb-4">{description}</p>
           <div className="flex justify-end gap-2">
             <button
               onClick={() => onSkip?.()}

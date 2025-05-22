@@ -282,6 +282,35 @@ const ProjectCard = ({
 }) => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const { currentStepId, setStepCompleted, completeOnboarding } = useOnboarding() as any;
+
+  // Add a class name to highlight the View Home button during onboarding
+  const viewHomeButtonClass =
+    currentStepId === 'view_project_home'
+      ? 'bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 text-white animate-pulse border-2 border-yellow-400'
+      : 'bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 text-white';
+
+  // Handler for clicking the View Home button
+  const handleViewHomeClick = async (e: React.MouseEvent) => {
+    // If we're in the view_project_home step, mark it as completed
+    if (currentStepId === 'view_project_home') {
+      console.log('[ProjectCard] 🎯 Marking view_project_home step as completed with project_id:', project.id);
+
+      // Complete the onboarding step with proper metadata
+      await setStepCompleted('view_project_home', {
+        project_id: project.id,
+        project_slug: project.slug,
+        project_name: project.name,
+        action: 'clicked_view_home',
+        timestamp: new Date().toISOString(),
+      });
+
+      // Complete the full onboarding flow
+      await completeOnboarding();
+    }
+
+    // Don't prevent the link navigation
+  };
 
   return (
     <>
@@ -302,7 +331,9 @@ const ProjectCard = ({
           <Link href={`/app/${project.slug}/home`} passHref>
             <Button
               variant="default"
-              className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 text-white"
+              className={viewHomeButtonClass}
+              data-onboarding="view-home-button"
+              onClick={handleViewHomeClick}
             >
               View Home
             </Button>
@@ -621,6 +652,22 @@ const ProjectList = () => {
   useEffect(() => {
     fetchProjects();
   }, [supabase]);
+
+  // Handle the onboarding flow - show view_project_home step when dashboard_tour completes
+  useEffect(() => {
+    if (currentStepId === 'dashboard_tour' && projects.length > 0) {
+      // Wait a moment to make sure the UI is ready
+      const timer = setTimeout(() => {
+        // If there's a "View Home" button, we can add the highlight to it
+        const viewHomeButtons = document.querySelectorAll('[data-onboarding="view-home-button"]');
+        if (viewHomeButtons.length > 0) {
+          console.log('[ProjectList] 🔍 Found View Home buttons:', viewHomeButtons.length);
+        }
+      }, 500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [currentStepId, projects]);
 
   const handleProjectCreated = async (project: Project) => {
     setProjects([project, ...projects]);

@@ -41,11 +41,44 @@ export const OnboardingOverlay = () => {
     actionText: 'Continue',
   });
   const { theme } = useTheme();
+  // Store the current project info for metadata
+  const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
 
   // Log current step for debugging
   useEffect(() => {
     console.log('[OnboardingOverlay] Current step:', currentStepId);
   }, [currentStepId]);
+
+  // Extract project ID from URL if available
+  useEffect(() => {
+    // Try to get project ID from URL or localStorage
+    const extractProjectIdFromUrl = () => {
+      try {
+        const path = window.location.pathname;
+        const match = path.match(/\/app\/([^\/]+)/);
+        if (match && match[1]) {
+          console.log('[OnboardingOverlay] 🔍 Found project slug in URL:', match[1]);
+          // Get project ID from local storage if available
+          const projectsJson = localStorage.getItem('recent-projects');
+          if (projectsJson) {
+            const projects = JSON.parse(projectsJson);
+            const project = projects.find((p: any) => p.slug === match[1]);
+            if (project) {
+              console.log('[OnboardingOverlay] 🔍 Found project ID:', project.id);
+              setCurrentProjectId(project.id);
+              return project.id;
+            }
+          }
+        }
+        return null;
+      } catch (e) {
+        console.error('[OnboardingOverlay] Error extracting project ID:', e);
+        return null;
+      }
+    };
+
+    extractProjectIdFromUrl();
+  }, []);
 
   // Handle success celebration when project is created
   useEffect(() => {
@@ -60,6 +93,21 @@ export const OnboardingOverlay = () => {
     }
   }, [currentStepId]);
 
+  // Handle view project home success celebration
+  useEffect(() => {
+    if (currentStepId === 'view_project_home') {
+      console.log('[OnboardingOverlay] 🏠 Prompting to view project home');
+
+      // If there's a View Home button on the page, add a visual indicator
+      const viewHomeButtons = document.querySelectorAll('[data-onboarding="view-home-button"]');
+      if (viewHomeButtons.length > 0) {
+        viewHomeButtons.forEach((button) => {
+          button.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+      }
+    }
+  }, [currentStepId]);
+
   // Determine which component to show based on current step
   const renderCurrentStep = () => {
     console.log('[OnboardingOverlay] Rendering step:', currentStepId);
@@ -69,11 +117,11 @@ export const OnboardingOverlay = () => {
         return (
           <WelcomeModal
             onStart={async () => {
-              await setStepCompleted('welcome');
+              await setStepCompleted('welcome', { timestamp: new Date().toISOString() });
               await setCurrentStep('create_project');
             }}
             onSkip={async () => {
-              await setStepCompleted('welcome');
+              await setStepCompleted('welcome', { skipped: true, timestamp: new Date().toISOString() });
               await completeOnboarding();
             }}
           />
@@ -89,7 +137,7 @@ export const OnboardingOverlay = () => {
               createProjectButton?.click();
             }}
             onSkip={async () => {
-              await setStepCompleted('create_project');
+              await setStepCompleted('create_project', { skipped: true, timestamp: new Date().toISOString() });
               await completeOnboarding();
             }}
           />
@@ -98,6 +146,35 @@ export const OnboardingOverlay = () => {
       case 'dashboard_tour':
         // Will be handled by Joyride tour
         return null;
+
+      case 'view_project_home':
+        // Create a tooltip highlighting the View Home button
+        return (
+          <ProjectCreationTooltip
+            targetSelector="[data-onboarding='view-home-button']"
+            title="View Your Project"
+            description="Click to view your project's home page and see what your users will experience."
+            onComplete={async () => {
+              // The click will be handled by the button itself
+              // Mark as completed here as well to ensure it works
+              const metadata = {
+                project_id: currentProjectId,
+                action: 'clicked_got_it',
+                timestamp: new Date().toISOString(),
+              };
+              await setStepCompleted('view_project_home', metadata);
+              await completeOnboarding();
+            }}
+            onSkip={async () => {
+              await setStepCompleted('view_project_home', {
+                project_id: currentProjectId,
+                skipped: true,
+                timestamp: new Date().toISOString(),
+              });
+              await completeOnboarding();
+            }}
+          />
+        );
 
       default:
         console.log('[OnboardingOverlay] Unknown step:', currentStepId);
@@ -120,6 +197,7 @@ export const OnboardingOverlay = () => {
           content: 'Your feedback is organized in a Kanban board with different status columns.',
           disableBeacon: true,
         },
+        // Removed the View Home step from here to avoid duplication
       ]);
 
       setRunJoyride(true);
@@ -133,24 +211,57 @@ export const OnboardingOverlay = () => {
     const { status, type, index } = data;
 
     if (type === 'step:after' && index === joyrideSteps.length - 1) {
-      setStepCompleted('dashboard_tour');
-      completeOnboarding();
+      setStepCompleted('dashboard_tour', {
+        project_id: currentProjectId,
+        completed_via: 'joyride_tour',
+        timestamp: new Date().toISOString(),
+      });
+      // Instead of completing, move to the view_project_home step
+      setCurrentStep('view_project_home');
     }
 
     if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
       setRunJoyride(false);
-      completeOnboarding();
+      // If skipped, complete onboarding
+      if (status === STATUS.SKIPPED) {
+        setStepCompleted('dashboard_tour', {
+          project_id: currentProjectId,
+          skipped: true,
+          timestamp: new Date().toISOString(),
+        });
+        completeOnboarding();
+      } else {
+        // Move to view_project_home step with proper metadata
+        setStepCompleted('dashboard_tour', {
+          project_id: currentProjectId,
+          completed_via: 'joyride_tour',
+          timestamp: new Date().toISOString(),
+        });
+        setCurrentStep('view_project_home');
+      }
     }
   };
 
   // Handle success celebration completion
   const handleSuccessCelebrationComplete = async () => {
-    console.log('[OnboardingOverlay] 🎯 Success celebration complete, transitioning to welcome');
+    console.log('[OnboardingOverlay] 🎯 Success celebration complete, starting dashboard tour');
     setShowSuccessCelebration(false);
-    // Add a small delay before showing welcome modal
-    setTimeout(async () => {
-      await setCurrentStep('welcome');
-    }, 100);
+
+    // Start the dashboard tour immediately if we have a dashboard tour step
+    if (currentStepId === 'dashboard_tour') {
+      setTimeout(async () => {
+        setRunJoyride(true);
+      }, 100);
+    } else {
+      // Skip to view_project_home if there's no dashboard to tour
+      await setStepCompleted('dashboard_tour', {
+        project_id: currentProjectId,
+        skipped: true,
+        auto_advanced: true,
+        timestamp: new Date().toISOString(),
+      });
+      await setCurrentStep('view_project_home');
+    }
   };
 
   return (
@@ -164,7 +275,7 @@ export const OnboardingOverlay = () => {
           actionText={successMessage.actionText}
           onComplete={handleSuccessCelebrationComplete}
           onAction={handleSuccessCelebrationComplete}
-          duration={0} // Disable auto-dismiss
+          duration={0} // Set duration to 0 to disable auto-dismiss
         />
       )}
 

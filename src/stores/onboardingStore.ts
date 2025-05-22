@@ -64,6 +64,13 @@ export const useOnboardingStore = create<OnboardingState>((set, get) => ({
       completed: false,
       position: 2,
     },
+    view_project_home: {
+      id: 'view_project_home',
+      title: 'View Your Project',
+      description: 'Explore your project home page',
+      completed: false,
+      position: 3,
+    },
   },
   isLoading: true,
 
@@ -176,6 +183,13 @@ export const useOnboardingStore = create<OnboardingState>((set, get) => ({
       data: { user },
     } = await supabase.auth.getUser();
 
+    // Add timestamp if not provided
+    if (!metadata.timestamp) {
+      metadata.timestamp = new Date().toISOString();
+    }
+
+    console.log(`[OnboardingStore] ✅ Completing step: ${stepId} with metadata:`, metadata);
+
     // Update local state
     const updatedSteps = { ...get().steps };
     if (updatedSteps[stepId]) {
@@ -195,6 +209,7 @@ export const useOnboardingStore = create<OnboardingState>((set, get) => ({
             const updatedParsedSteps = { ...parsedState.steps };
             if (updatedParsedSteps[stepId]) {
               updatedParsedSteps[stepId].completed = true;
+              updatedParsedSteps[stepId].metadata = metadata;
             }
 
             localStorage.setItem(
@@ -213,12 +228,22 @@ export const useOnboardingStore = create<OnboardingState>((set, get) => ({
 
     if (!user) return;
 
-    // Update in Supabase
-    await supabase.rpc('update_onboarding_step', {
-      step_id: stepId,
-      completed: true,
-      metadata,
-    });
+    // Update in Supabase with enhanced metadata
+    try {
+      const { error } = await supabase.rpc('update_onboarding_step', {
+        step_id: stepId,
+        completed: true,
+        metadata,
+      });
+
+      if (error) {
+        console.error('[OnboardingStore] ❌ Error updating step in Supabase:', error);
+      } else {
+        console.log(`[OnboardingStore] ✅ Successfully saved step ${stepId} to Supabase`);
+      }
+    } catch (error) {
+      console.error('[OnboardingStore] ❌ Error calling update_onboarding_step:', error);
+    }
 
     // Find the next incomplete step
     const nextStep = Object.values(updatedSteps)
