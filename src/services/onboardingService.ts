@@ -1,4 +1,4 @@
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@/utils/supabase/client';
 import { OnboardingStatus, UpdateOnboardingStepParams, OnboardingActionResult } from '@/types/onboarding';
 
 /**
@@ -14,7 +14,7 @@ export const onboardingService = {
    * @returns Result of the operation
    */
   async updateStep(stepId: string, completed: boolean, metadata = {}): Promise<OnboardingActionResult> {
-    const supabase = createClientComponentClient();
+    const supabase = createClient();
 
     try {
       const { data, error } = await supabase.rpc('update_onboarding_step', {
@@ -44,7 +44,7 @@ export const onboardingService = {
    * @returns Result of the operation
    */
   async completeOnboarding(): Promise<OnboardingActionResult> {
-    const supabase = createClientComponentClient();
+    const supabase = createClient();
 
     try {
       const { data, error } = await supabase.rpc('complete_onboarding');
@@ -74,7 +74,7 @@ export const onboardingService = {
     completed: boolean;
     error?: string;
   }> {
-    const supabase = createClientComponentClient();
+    const supabase = createClient();
 
     try {
       const {

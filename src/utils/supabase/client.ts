@@ -10,7 +10,7 @@ class DualStorage {
   getItem(key: string) {
     try {
       // For Supabase auth cookies, don't try to parse them as JSON
-      if (key.includes('auth-token-code-verifier')) {
+      if (key.includes('auth-token-code-verifier') || key.includes('-auth-token')) {
         // Return raw value without parsing
         return localStorage.getItem(key);
       }

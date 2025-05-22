@@ -1,7 +1,7 @@
 'use client';
 
 import { create } from 'zustand';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@/utils/supabase/client';
 import { OnboardingStepConfig } from '@/types/onboarding';
 
 interface StepStatus {
@@ -96,7 +96,7 @@ export const useOnboardingStore = create<OnboardingState>((set, get) => ({
       }
 
       // Try to get user session
-      const supabase = createClientComponentClient();
+      const supabase = createClient();
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -171,7 +171,7 @@ export const useOnboardingStore = create<OnboardingState>((set, get) => ({
   },
 
   setStepCompleted: async (stepId, metadata = {}) => {
-    const supabase = createClientComponentClient();
+    const supabase = createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -235,7 +235,7 @@ export const useOnboardingStore = create<OnboardingState>((set, get) => ({
   setCurrentStep: async (stepId) => {
     console.log('[OnboardingStore] Setting current step:', stepId);
 
-    const supabase = createClientComponentClient();
+    const supabase = createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -289,7 +289,7 @@ export const useOnboardingStore = create<OnboardingState>((set, get) => ({
   },
 
   skipOnboarding: async () => {
-    const supabase = createClientComponentClient();
+    const supabase = createClient();
 
     set({ isEnabled: false });
 
@@ -330,7 +330,7 @@ export const useOnboardingStore = create<OnboardingState>((set, get) => ({
   },
 
   completeOnboarding: async () => {
-    const supabase = createClientComponentClient();
+    const supabase = createClient();
 
     try {
       // First try the RPC call
