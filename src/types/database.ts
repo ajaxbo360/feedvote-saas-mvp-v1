@@ -8,6 +8,9 @@ export interface Project {
   updated_at: string;
 }
 
+// Import ApiKey type from our api-keys.ts file
+import { ApiKey, ApiKeyType } from './api-keys';
+
 export interface Database {
   public: {
     Tables: {
@@ -15,6 +18,11 @@ export interface Database {
         Row: Project;
         Insert: Omit<Project, 'id' | 'created_at' | 'updated_at'>;
         Update: Partial<Omit<Project, 'id'>>;
+      };
+      project_api_keys: {
+        Row: ApiKey;
+        Insert: Omit<ApiKey, 'id' | 'created_at'> & { key_value?: string };
+        Update: Partial<Omit<ApiKey, 'id' | 'project_id' | 'key_value'>>;
       };
       profiles: {
         Row: {
