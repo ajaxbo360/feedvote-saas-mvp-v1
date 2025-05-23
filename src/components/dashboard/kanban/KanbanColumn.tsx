@@ -10,9 +10,11 @@ interface KanbanColumnProps {
   title: string;
   icon: string;
   items: KanbanItemType[];
+  onVote?: (id: string) => void;
+  onStatusChange?: (id: string, status: 'rejected') => void;
 }
 
-export function KanbanColumn({ id, title, icon, items }: KanbanColumnProps) {
+export function KanbanColumn({ id, title, icon, items, onVote, onStatusChange }: KanbanColumnProps) {
   const { setNodeRef } = useDroppable({
     id,
   });
@@ -34,6 +36,8 @@ export function KanbanColumn({ id, title, icon, items }: KanbanColumnProps) {
               title={item.title}
               description={item.description}
               votes={item.votes}
+              onVote={onVote}
+              onStatusChange={onStatusChange}
             />
           ))}
         </SortableContext>

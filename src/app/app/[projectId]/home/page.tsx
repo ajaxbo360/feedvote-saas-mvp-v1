@@ -52,13 +52,13 @@ export default function ProjectHomePage({ params }: PageProps) {
   }
 
   return (
-    <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-8">
-      <div className="flex flex-col gap-4">
-        <div className="py-2 mb-6">
+    <main className="flex flex-1 flex-col h-[calc(100vh-4rem)]">
+      <div className="flex flex-col flex-1 px-8">
+        <div className="py-4">
           <h1 className="text-2xl font-semibold">Your Board</h1>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+        <div className="flex-1 bg-white dark:bg-gray-800">
           <KanbanBoard />
         </div>
       </div>

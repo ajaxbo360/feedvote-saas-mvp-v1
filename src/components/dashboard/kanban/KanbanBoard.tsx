@@ -65,7 +65,7 @@ export function KanbanBoard() {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 3, // 3px movement required before drag starts
+        distance: 3,
       },
     }),
   );
@@ -114,19 +114,42 @@ export function KanbanBoard() {
     setItems(arrayMove(items, oldIndex, newIndex));
   }
 
+  const handleVote = (id: string) => {
+    setItems((items) =>
+      items.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              votes: item.votes + 1,
+            }
+          : item,
+      ),
+    );
+  };
+
+  const handleStatusChange = (id: string, status: Status) => {
+    setItems((items) =>
+      items.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              status,
+            }
+          : item,
+      ),
+    );
+  };
+
   return (
-    <div className="flex flex-col">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">Your Board</h2>
-        <div className="flex items-center gap-4">
-          <button className="text-sm text-gray-600 hover:text-gray-900">Custom tags</button>
-          <button className="text-sm text-gray-600 hover:text-gray-900">Sort by Votes ▼</button>
-          <button className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Create</button>
-        </div>
+    <div className="flex flex-col h-full">
+      <div className="flex justify-end items-center gap-4 px-8 py-2">
+        <button className="text-sm text-gray-600 hover:text-gray-900">Custom tags</button>
+        <button className="text-sm text-gray-600 hover:text-gray-900">Sort by Votes ▼</button>
+        <button className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Create</button>
       </div>
 
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-5 gap-4">
+        <div className="grid grid-cols-5 gap-4 px-8 pb-8 h-full">
           {columns.map((column) => (
             <KanbanColumn
               key={column.id}
@@ -134,6 +157,8 @@ export function KanbanBoard() {
               title={column.title}
               icon={column.icon}
               items={items.filter((item) => item.status === column.id)}
+              onVote={handleVote}
+              onStatusChange={handleStatusChange}
             />
           ))}
         </div>
@@ -147,6 +172,8 @@ export function KanbanBoard() {
                   title={activeItem.title}
                   description={activeItem.description}
                   votes={activeItem.votes}
+                  onVote={handleVote}
+                  onStatusChange={handleStatusChange}
                 />
               ) : null}
             </DragOverlay>,
