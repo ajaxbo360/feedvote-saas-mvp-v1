@@ -1,19 +1,17 @@
 'use client';
 
+import { KanbanBoard } from '@/components/dashboard/kanban/KanbanBoard';
 import { createClient } from '@/utils/supabase/client';
 import { useEffect, useState } from 'react';
 import { redirect } from 'next/navigation';
-import { KanbanBoard } from '@/components/dashboard/kanban/KanbanBoard';
 
-interface PageProps {
+interface FeedPageProps {
   params: {
-    projectId: string;
+    slug: string;
   };
 }
 
-export default function ProjectHomePage({ params }: PageProps) {
-  const { projectId } = params;
-  const slug = projectId; // The URL param is actually the slug
+export default function FeedPage({ params }: FeedPageProps) {
   const [user, setUser] = useState<any>(null);
   const [project, setProject] = useState<any>(null);
   const supabase = createClient();
@@ -24,16 +22,15 @@ export default function ProjectHomePage({ params }: PageProps) {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) {
-        redirect('/login');
+        redirect('/');
       }
       setUser(user);
     }
 
     async function getProject() {
-      const { data: project, error } = await supabase.from('projects').select('*').eq('slug', slug).single();
+      const { data: project } = await supabase.from('projects').select('*').eq('slug', params.slug).single();
 
-      if (error || !project) {
-        console.error('Project not found:', error?.message || 'No project with this slug');
+      if (!project) {
         redirect('/app');
       }
       setProject(project);
@@ -41,7 +38,7 @@ export default function ProjectHomePage({ params }: PageProps) {
 
     getUser();
     getProject();
-  }, [slug]);
+  }, [params.slug]);
 
   if (!user || !project) {
     return (
@@ -54,10 +51,6 @@ export default function ProjectHomePage({ params }: PageProps) {
   return (
     <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-8">
       <div className="flex flex-col gap-4">
-        <div className="py-2 mb-6">
-          <h1 className="text-2xl font-semibold">Your Board</h1>
-        </div>
-
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
           <KanbanBoard />
         </div>
