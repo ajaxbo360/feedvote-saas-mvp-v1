@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PlusIcon, KeyIcon, CopyIcon, RefreshCcwIcon, TrashIcon, CheckIcon } from 'lucide-react';
+import { PlusIcon, KeyIcon, CopyIcon, TrashIcon, CheckIcon } from 'lucide-react';
 import { ApiKey } from '@/types/api-keys';
 import { useToast } from '@/components/ui/use-toast';
 import { Badge } from '@/components/ui/badge';
@@ -39,23 +39,6 @@ async function deleteApiKey(id: string): Promise<void> {
   }
 }
 
-async function regenerateApiKey(id: string): Promise<ApiKey> {
-  const response = await fetch(`/api/api-keys/${id}/regenerate`, {
-    method: 'POST',
-    headers: {
-      ...(await getCsrfHeader()),
-    },
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to regenerate API key');
-  }
-
-  const result = await response.json();
-  return result.data;
-}
-
 export default function ApiKeysPage() {
   const params = useParams<{ projectId: string }>();
   const projectId = params.projectId;
@@ -66,7 +49,6 @@ export default function ApiKeysPage() {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('all');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [regeneratedKey, setRegeneratedKey] = useState<ApiKey | null>(null);
   const [copiedKeyId, setCopiedKeyId] = useState<string | null>(null);
   const [selectedApiKey, setSelectedApiKey] = useState<ApiKey | null>(null);
 
@@ -118,31 +100,6 @@ export default function ApiKeysPage() {
       title: 'Copied!',
       description: 'API key copied to clipboard',
     });
-  };
-
-  const handleRegenerateKey = async (id: string) => {
-    try {
-      const updatedKey = await regenerateApiKey(id);
-      setApiKeys((prev) => prev.map((key) => (key.id === id ? updatedKey : key)));
-      setRegeneratedKey(updatedKey);
-
-      // If the regenerated key is the selected one, update it
-      if (selectedApiKey && selectedApiKey.id === id) {
-        setSelectedApiKey(updatedKey);
-      }
-
-      toast({
-        title: 'Success',
-        description: 'API key regenerated successfully',
-      });
-    } catch (error) {
-      console.error('Error regenerating API key:', error);
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to regenerate API key',
-        variant: 'destructive',
-      });
-    }
   };
 
   const handleDeleteKey = async (id: string) => {
@@ -352,15 +309,6 @@ export default function ApiKeysPage() {
                             <CopyIcon className="h-3.5 w-3.5" />
                           )}
                           <span className="md:inline hidden">{copiedKeyId === key.id ? 'Copied' : 'Copy'}</span>
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-8 px-2 flex gap-1"
-                          onClick={() => handleRegenerateKey(key.id)}
-                        >
-                          <RefreshCcwIcon className="h-3.5 w-3.5" />
-                          <span className="md:inline hidden">Regenerate</span>
                         </Button>
                         <Button
                           size="sm"
