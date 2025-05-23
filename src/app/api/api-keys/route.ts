@@ -26,7 +26,9 @@ export async function GET(req: NextRequest) {
     const {
       data: { user },
     } = await supabase.auth.getUser();
+
     if (!user) {
+      console.log('User not authenticated');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -35,19 +37,36 @@ export async function GET(req: NextRequest) {
     const projectId = url.searchParams.get('project_id');
 
     if (!projectId) {
+      console.log('Project ID not provided');
       return NextResponse.json({ error: 'Project ID is required' }, { status: 400 });
     }
 
-    // Verify the user owns this project
-    const { data: project, error: projectError } = await supabase
+    console.log('Checking project access:', { projectId, userId: user.id });
+
+    // First check if the project exists
+    const { data: projectExists, error: projectExistsError } = await supabase
       .from('projects')
       .select('id')
+      .eq('id', projectId)
+      .single();
+
+    if (projectExistsError) {
+      console.log('Project does not exist:', projectId);
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+
+    // Now check if the user owns this project
+    const { data: project, error: projectError } = await supabase
+      .from('projects')
+      .select('id, user_id')
       .eq('id', projectId)
       .eq('user_id', user.id)
       .single();
 
+    console.log('Project ownership check:', { project, error: projectError });
+
     if (projectError || !project) {
-      return NextResponse.json({ error: 'Project not found or not authorized' }, { status: 403 });
+      return NextResponse.json({ error: 'Not authorized to access this project' }, { status: 403 });
     }
 
     // Get all API keys for the project

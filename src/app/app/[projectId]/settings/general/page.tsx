@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import {
   Dialog,
@@ -27,12 +27,16 @@ import {
 } from 'recharts';
 import { ChartContainer } from '@/components/ui/chart';
 import { Separator } from '@/components/ui/separator';
-import { Search, Shield, Info, Lock } from 'lucide-react';
+import { Search, Shield, Info, Lock, CheckIcon, CopyIcon, RefreshCw } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Palette, Layout, Globe, Key } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getCsrfHeader } from '@/utils/csrf-protection';
+import { ApiKey } from '@/types/api-keys';
+import { Skeleton } from '@/components/ui/skeleton';
+import { createClient } from '@/utils/supabase/client';
 
 // Sample data for the charts - replace with real data from your API
 const analyticsData = [
@@ -45,12 +49,15 @@ const analyticsData = [
 
 export default function GeneralSettingsPage() {
   const params = useParams<{ projectId: string }>();
-  const projectId = params.projectId;
+  const slug = params.projectId; // This is actually the slug from the URL
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
+  const [loadingKeys, setLoadingKeys] = useState(true);
+  const [projectId, setProjectId] = useState<string | null>(null);
 
   // Config & Theming state
   const [config, setConfig] = useState({
@@ -75,6 +82,92 @@ export default function GeneralSettingsPage() {
 
   // Preview state
   const [previewMode, setPreviewMode] = useState<'light' | 'dark'>('light');
+
+  // Regenerate API Key state
+  const [showRegenerateModal, setShowRegenerateModal] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
+
+  // Fetch project ID from slug
+  useEffect(() => {
+    async function fetchProjectId() {
+      try {
+        const supabase = createClient();
+        const { data: project, error } = await supabase.from('projects').select('id').eq('slug', slug).single();
+
+        if (error || !project) {
+          throw new Error('Project not found');
+        }
+
+        setProjectId(project.id);
+      } catch (error) {
+        console.error('Error fetching project:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to load project. Please try again.',
+          variant: 'destructive',
+        });
+      }
+    }
+
+    if (slug) {
+      fetchProjectId();
+    }
+  }, [slug, toast]);
+
+  // Fetch API keys when we have the project ID
+  useEffect(() => {
+    async function fetchApiKeys() {
+      try {
+        setLoadingKeys(true);
+
+        // First ensure we have an authenticated session
+        const supabase = createClient();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (!session) {
+          throw new Error('Not authenticated');
+        }
+
+        if (!projectId) {
+          throw new Error('Project ID not available');
+        }
+
+        const response = await fetch(`/api/api-keys?project_id=${projectId}`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to fetch API keys');
+        }
+
+        const data = await response.json();
+        setApiKeys(data.data);
+      } catch (error) {
+        console.error('Error fetching API keys:', error);
+        toast({
+          title: 'Error',
+          description:
+            error instanceof Error ? error.message : 'Failed to fetch API keys. Please ensure you are logged in.',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoadingKeys(false);
+      }
+    }
+
+    if (projectId) {
+      fetchApiKeys();
+    }
+  }, [projectId, toast]);
+
+  // Get the secret API key
+  const secretKey = apiKeys.find((key) => key.key_type === 'secret');
 
   const handleSave = async () => {
     setSaving(true);
@@ -114,14 +207,65 @@ export default function GeneralSettingsPage() {
     }));
   };
 
-  const handleCopySecret = () => {
-    navigator.clipboard.writeText(config.apiSecret);
-    setCopiedSecret(true);
-    setTimeout(() => setCopiedSecret(false), 2000);
-    toast({
-      title: 'Copied!',
-      description: 'API Secret Key copied to clipboard',
-    });
+  const handleCopySecret = async () => {
+    if (!secretKey?.key_value) return;
+
+    try {
+      await navigator.clipboard.writeText(secretKey.key_value);
+      setCopiedSecret(true);
+      setTimeout(() => setCopiedSecret(false), 2000);
+      toast({
+        title: 'Copied!',
+        description: 'API Secret Key copied to clipboard',
+      });
+    } catch (error) {
+      console.error('Failed to copy:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to copy API key to clipboard',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleRegenerateKey = async () => {
+    if (!secretKey) return;
+
+    setRegenerating(true);
+    try {
+      const response = await fetch(`/api/api-keys/${secretKey.id}/regenerate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(await getCsrfHeader()),
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to regenerate API key');
+      }
+
+      const { data } = await response.json();
+
+      // Update the API keys list with the new key
+      setApiKeys((prev) => prev.map((key) => (key.id === data.id ? data : key)));
+
+      toast({
+        title: 'API Key Regenerated',
+        description: 'Your new API Secret Key has been generated.',
+      });
+    } catch (error) {
+      console.error('Error regenerating API key:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to regenerate API key. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setRegenerating(false);
+      setShowRegenerateModal(false);
+    }
   };
 
   return (
@@ -679,22 +823,81 @@ export default function GeneralSettingsPage() {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="apiSecret">API Secret Key</Label>
-                    <div className="flex space-x-2">
-                      <Input
-                        id="apiSecret"
-                        name="apiSecret"
-                        type="text"
-                        value={config.apiSecret}
-                        readOnly
-                        className="font-mono text-sm bg-muted"
-                      />
-                      <Button variant="outline" onClick={handleCopySecret}>
-                        {copiedSecret ? 'Copied!' : 'Copy'}
-                      </Button>
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center gap-2">
+                        <div className="relative flex-1">
+                          {loadingKeys ? (
+                            <Skeleton className="h-10 w-full" />
+                          ) : (
+                            <Input
+                              id="apiSecret"
+                              name="apiSecret"
+                              type="text"
+                              value={secretKey?.key_value || 'No API key found'}
+                              readOnly
+                              className="font-mono text-sm bg-muted pr-24"
+                            />
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 h-7 hover:bg-muted/50"
+                            onClick={handleCopySecret}
+                            disabled={loadingKeys || !secretKey?.key_value}
+                          >
+                            {copiedSecret ? (
+                              <span className="flex items-center gap-1 text-green-500">
+                                <CheckIcon className="h-3 w-3" />
+                                Copied
+                              </span>
+                            ) : (
+                              <span className="flex items-center gap-1">
+                                <CopyIcon className="h-3 w-3" />
+                                Copy
+                              </span>
+                            )}
+                          </Button>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-10 w-10 shrink-0"
+                          onClick={() => setShowRegenerateModal(true)}
+                          disabled={loadingKeys || !secretKey}
+                        >
+                          <RefreshCw className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <Lock className="h-4 w-4 mt-0.5 shrink-0" />
+                        <div className="space-y-1">
+                          <p>
+                            Keep this key secure and never share it publicly. Used to authenticate your API requests.
+                          </p>
+                          {secretKey && (
+                            <p>
+                              Created:{' '}
+                              {new Date(secretKey.created_at).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                              })}
+                              {secretKey.last_used_at && (
+                                <>
+                                  {' '}
+                                  · Last used:{' '}
+                                  {new Date(secretKey.last_used_at).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric',
+                                  })}
+                                </>
+                              )}
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      Use this key to authenticate your API requests. Keep it secure and never share it publicly.
-                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -729,6 +932,31 @@ export default function GeneralSettingsPage() {
               </Button>
               <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
                 {deleting ? 'Deleting...' : 'Delete Project'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Regenerate API Key Dialog */}
+        <Dialog open={showRegenerateModal} onOpenChange={setShowRegenerateModal}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Regenerate API Secret Key</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to regenerate your API Secret Key? Your old key will stop working immediately and
+                you'll need to update any services using it.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRegenerateModal(false)} disabled={regenerating}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleRegenerateKey}
+                disabled={regenerating}
+                className="bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white"
+              >
+                {regenerating ? 'Regenerating...' : 'Yes, Regenerate Key'}
               </Button>
             </DialogFooter>
           </DialogContent>

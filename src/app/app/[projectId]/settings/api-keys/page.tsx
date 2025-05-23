@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +14,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { CreateApiKeyDialog } from '@/components/api-keys/create-api-key-dialog';
 import { WidgetIntegrationSnippets } from '@/components/api-keys/widget-integration-snippets';
 import { getCsrfHeader } from '@/utils/csrf-protection';
+import { createClient } from '@/utils/supabase/client';
 
 // API client functions
 async function listApiKeys(projectId: string): Promise<ApiKey[]> {
@@ -41,7 +42,7 @@ async function deleteApiKey(id: string): Promise<void> {
 
 export default function ApiKeysPage() {
   const params = useParams<{ projectId: string }>();
-  const projectId = params.projectId;
+  const slug = params.projectId; // This is actually the slug from the URL
   const { toast } = useToast();
 
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
@@ -51,12 +52,12 @@ export default function ApiKeysPage() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [copiedKeyId, setCopiedKeyId] = useState<string | null>(null);
   const [selectedApiKey, setSelectedApiKey] = useState<ApiKey | null>(null);
+  const [projectId, setProjectId] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchApiKeys();
-  }, [projectId]);
+  // Function to fetch API keys
+  const fetchApiKeys = useCallback(async () => {
+    if (!projectId) return;
 
-  async function fetchApiKeys() {
     try {
       setLoading(true);
       const keys = await listApiKeys(projectId);
@@ -80,7 +81,40 @@ export default function ApiKeysPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [projectId, toast]);
+
+  // Fetch project ID from slug
+  useEffect(() => {
+    async function fetchProjectId() {
+      try {
+        const supabase = createClient();
+        const { data: project, error } = await supabase.from('projects').select('id').eq('slug', slug).single();
+
+        if (error || !project) {
+          throw new Error('Project not found');
+        }
+
+        setProjectId(project.id);
+      } catch (error) {
+        console.error('Error fetching project:', error);
+        setError('Failed to load project. Please try again.');
+        toast({
+          title: 'Error',
+          description: 'Failed to load project. Please try again.',
+          variant: 'destructive',
+        });
+      }
+    }
+
+    if (slug) {
+      fetchProjectId();
+    }
+  }, [slug, toast]);
+
+  // Fetch API keys when we have the project ID
+  useEffect(() => {
+    fetchApiKeys();
+  }, [projectId, fetchApiKeys]);
 
   const handleCreateSuccess = (newKey: ApiKey) => {
     setApiKeys((prev) => [newKey, ...prev]);
@@ -215,7 +249,14 @@ export default function ApiKeysPage() {
                 <CardDescription>{error}</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button variant="outline" onClick={fetchApiKeys}>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    if (projectId) {
+                      fetchApiKeys();
+                    }
+                  }}
+                >
                   Retry
                 </Button>
               </CardContent>
@@ -329,18 +370,20 @@ export default function ApiKeysPage() {
         </TabsContent>
       </Tabs>
 
-      {selectedApiKey && (
+      {projectId && selectedApiKey && (
         <div className="mt-8">
           <WidgetIntegrationSnippets projectId={projectId} apiKey={selectedApiKey} />
         </div>
       )}
 
-      <CreateApiKeyDialog
-        projectId={projectId}
-        open={createDialogOpen}
-        onOpenChange={setCreateDialogOpen}
-        onSuccess={handleCreateSuccess}
-      />
+      {projectId && (
+        <CreateApiKeyDialog
+          projectId={projectId}
+          open={createDialogOpen}
+          onOpenChange={setCreateDialogOpen}
+          onSuccess={handleCreateSuccess}
+        />
+      )}
     </div>
   );
 }

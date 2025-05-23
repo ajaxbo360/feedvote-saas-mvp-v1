@@ -24,50 +24,57 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const id = params.id;
+    const keyId = params.id;
 
-    // Verify the API key exists and the user owns it
-    const { data: existingKey, error: keyError } = await supabase
+    // First, verify the user owns this API key through the project
+    const { data: apiKey, error: apiKeyError } = await supabase
       .from('project_api_keys')
-      .select('id, key_type, project_id, projects!inner(user_id)')
-      .eq('id', id)
-      .eq('projects.user_id', user.id)
+      .select('project_id, key_type')
+      .eq('id', keyId)
       .single();
 
-    if (keyError || !existingKey) {
-      return NextResponse.json({ error: 'API key not found or not authorized' }, { status: 404 });
+    if (apiKeyError || !apiKey) {
+      return NextResponse.json({ error: 'API key not found' }, { status: 404 });
     }
 
-    // Generate a new key value with the same key type
-    const { data: newKeyValue, error: genError } = await supabase
-      .rpc('generate_api_key', { key_type: existingKey.key_type })
+    // Verify project ownership
+    const { data: project, error: projectError } = await supabase
+      .from('projects')
+      .select('id')
+      .eq('id', apiKey.project_id)
+      .eq('user_id', user.id)
       .single();
 
-    if (genError || !newKeyValue) {
-      console.error('Error generating new key value:', genError);
-      return NextResponse.json({ error: 'Failed to generate new key value' }, { status: 500 });
+    if (projectError || !project) {
+      return NextResponse.json({ error: 'Not authorized to modify this API key' }, { status: 403 });
+    }
+
+    // Generate a new key value using the database function
+    const { data: newKey, error: regenerateError } = await supabase.rpc('generate_api_key', {
+      key_type: apiKey.key_type,
+    });
+
+    if (regenerateError || !newKey) {
+      console.error('Error generating new API key:', regenerateError);
+      return NextResponse.json({ error: 'Failed to generate new API key' }, { status: 500 });
     }
 
     // Update the API key with the new value
-    const { data, error } = await supabase
+    const { data: updatedKey, error: updateError } = await supabase
       .from('project_api_keys')
-      .update({
-        key_value: newKeyValue,
-        last_used_at: null,
-        created_at: new Date().toISOString(),
-      })
-      .eq('id', id)
+      .update({ key_value: newKey })
+      .eq('id', keyId)
       .select()
       .single();
 
-    if (error) {
-      console.error('Error regenerating API key:', error);
-      return NextResponse.json({ error: 'Failed to regenerate API key' }, { status: 500 });
+    if (updateError) {
+      console.error('Error updating API key:', updateError);
+      return NextResponse.json({ error: 'Failed to update API key' }, { status: 500 });
     }
 
-    return NextResponse.json({ data });
+    return NextResponse.json({ data: updatedKey });
   } catch (error) {
-    console.error('Error regenerating API key:', error);
+    console.error('Error in API key regeneration:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
