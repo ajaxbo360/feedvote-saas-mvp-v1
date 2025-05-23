@@ -32,6 +32,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Palette, Layout, Globe, Key } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 // Sample data for the charts - replace with real data from your API
 const analyticsData = [
@@ -506,15 +507,21 @@ export default function GeneralSettingsPage() {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <Label>Theme Preview</Label>
-                      <div className="flex items-center gap-2 bg-muted rounded-lg p-1">
+                      <div className="inline-flex h-11 items-center gap-[8px] justify-center rounded-sm bg-background px-[6px] py-[6px] text-muted-foreground border-border border">
                         <button
-                          className={`px-3 py-1 rounded ${previewMode === 'light' ? 'bg-background shadow-sm' : ''}`}
+                          className={cn(
+                            'inline-flex items-center justify-center whitespace-nowrap rounded-xs h-9 px-4 py-2 text-sm font-medium cursor-pointer ring-offset-background transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-background hover:bg-muted/50',
+                            previewMode === 'light' ? 'bg-foreground/5 text-foreground shadow-sm' : '',
+                          )}
                           onClick={() => setPreviewMode('light')}
                         >
                           Light
                         </button>
                         <button
-                          className={`px-3 py-1 rounded ${previewMode === 'dark' ? 'bg-background shadow-sm' : ''}`}
+                          className={cn(
+                            'inline-flex items-center justify-center whitespace-nowrap rounded-xs h-9 px-4 py-2 text-sm font-medium cursor-pointer ring-offset-background transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-background hover:bg-muted/50',
+                            previewMode === 'dark' ? 'bg-foreground/5 text-foreground shadow-sm' : '',
+                          )}
                           onClick={() => setPreviewMode('dark')}
                         >
                           Dark
