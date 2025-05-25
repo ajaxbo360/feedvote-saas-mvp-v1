@@ -5,13 +5,27 @@ import { ThemeToggle } from '@/components/ui/theme-toggle';
 import Image from 'next/image';
 import { useToast } from '@/components/ui/use-toast';
 import { signInWithGoogle } from '@/utils/auth-helper';
+import { createClient } from '@/utils/supabase/client';
+import { useEffect, useState } from 'react';
 
 interface Props {
   user: User | null;
 }
 
-export default function Header({ user }: Props) {
+export default function Header({ user: initialUser }: Props) {
   const { toast } = useToast();
+  const [user, setUser] = useState<User | null>(initialUser);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    checkUser();
+  }, []);
 
   const handleGoogleLogin = async () => {
     try {
@@ -84,9 +98,9 @@ export default function Header({ user }: Props) {
             <Button
               variant={'default'}
               asChild={true}
-              className="rounded-xl bg-green-600 hover:bg-green-700 text-white px-6"
+              className="h-11 gradient-button rounded-xl px-6 py-3 font-semibold text-sm shadow-md bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white"
             >
-              <Link href={'/dashboard'}>Dashboard</Link>
+              <Link href={'/app'}>Open Dashboard</Link>
             </Button>
           ) : (
             <Button

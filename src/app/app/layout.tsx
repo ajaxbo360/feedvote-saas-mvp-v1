@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import { AuthBridge } from '@/components/auth/auth-bridge';
+import { OnboardingProvider } from '@/providers/OnboardingProvider';
 
 export const metadata: Metadata = {
   title: 'FeedVote - App',
@@ -29,7 +30,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     return (
       <div className="flex min-h-screen flex-col">
         <AuthBridge />
-        {children}
+        <OnboardingProvider>{children}</OnboardingProvider>
       </div>
     );
   } catch (error) {

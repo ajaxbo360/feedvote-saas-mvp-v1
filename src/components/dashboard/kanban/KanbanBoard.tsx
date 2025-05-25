@@ -143,13 +143,17 @@ export function KanbanBoard() {
   return (
     <div className="flex flex-col h-full">
       <div className="flex justify-end items-center gap-4 px-8 py-2">
-        <button className="text-sm text-gray-600 hover:text-gray-900">Custom tags</button>
-        <button className="text-sm text-gray-600 hover:text-gray-900">Sort by Votes ▼</button>
+        <button className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200">
+          Custom tags
+        </button>
+        <button className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200">
+          Sort by Votes ▼
+        </button>
         <button className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Create</button>
       </div>
 
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-5 gap-4 px-8 pb-8 h-full">
+        <div className="grid grid-cols-5 gap-6 px-8 flex-1">
           {columns.map((column) => (
             <KanbanColumn
               key={column.id}

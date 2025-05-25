@@ -58,7 +58,7 @@ export default function ProjectHomePage({ params }: PageProps) {
           <h1 className="text-2xl font-semibold">Your Board</h1>
         </div>
 
-        <div className="flex-1 bg-white dark:bg-gray-800">
+        <div className="flex-1">
           <KanbanBoard />
         </div>
       </div>

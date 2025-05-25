@@ -6,7 +6,6 @@ import { ReactNode } from 'react';
 import type { Metadata } from 'next';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/ui/theme-provider';
-import { OnboardingProvider } from '@/providers/OnboardingProvider';
 
 // Dynamically set the base URL based on environment
 const getBaseUrl = () => {
@@ -97,7 +96,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen bg-background antialiased font-inter">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <OnboardingProvider>{children}</OnboardingProvider>
+          {children}
           <Toaster />
         </ThemeProvider>
       </body>

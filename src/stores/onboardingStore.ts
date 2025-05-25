@@ -3,6 +3,7 @@
 import { create } from 'zustand';
 import { createClient } from '@/utils/supabase/client';
 import { OnboardingStepConfig } from '@/types/onboarding';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 interface StepStatus {
   completed: boolean;
@@ -314,44 +315,49 @@ export const useOnboardingStore = create<OnboardingState>((set, get) => ({
   },
 
   skipOnboarding: async () => {
-    const supabase = createClient();
-
-    set({ isEnabled: false });
-
-    // Clean up persistent state if it exists
-    if (typeof window !== 'undefined') {
-      const forcedState = localStorage.getItem('onboarding-state');
-      if (forcedState) {
-        try {
-          const parsedState = JSON.parse(forcedState);
-          if (parsedState.persistent) {
-            console.log('[OnboardingStore] 🧹 Removing persistent state from localStorage');
-            localStorage.removeItem('onboarding-state');
-          }
-        } catch (e) {
-          console.error('[OnboardingStore] ❌ Error cleaning up persistent state:', e);
-        }
-      }
-    }
-
-    // Mark as skipped in Supabase but don't mark as completed
-    // This way we can potentially re-enable it later
+    const supabase = createClientComponentClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
 
     if (!user) return;
 
-    await supabase
-      .from('profiles')
-      .update({
-        onboarding_status: {
-          ...get().steps,
-          completed: false,
-          skipped: true,
-        },
-      })
-      .eq('id', user.id);
+    try {
+      // Get the current step ID before skipping
+      const currentStepId = get().currentStepId;
+
+      // Update the profile to mark onboarding as completed
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          onboarding_status: {
+            completed: true,
+            skipped: true,
+            skipped_at: new Date().toISOString(),
+            skipped_step: currentStepId,
+            completed_at: new Date().toISOString(),
+          },
+          onboarding_completed_at: new Date().toISOString(),
+        })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      // Update local state
+      set({
+        isEnabled: false,
+        isCompleted: true,
+        currentStepId: null,
+      });
+
+      // Clean up any persistent state
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('onboarding-state');
+      }
+    } catch (error) {
+      console.error('Error skipping onboarding:', error);
+      throw error;
+    }
   },
 
   completeOnboarding: async () => {

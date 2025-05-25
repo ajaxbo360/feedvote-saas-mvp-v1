@@ -47,14 +47,14 @@ export function KanbanItem({ id, title, description, votes, onVote, onStatusChan
       style={style}
       {...attributes}
       {...listeners}
-      className="bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm cursor-move border border-gray-100 dark:border-gray-700"
+      className="[--tw-bg-opacity:0] bg-transparent dark:bg-gray-900 backdrop-blur-sm rounded-lg p-3 shadow-sm cursor-move border border-border dark:border-gray-700 hover:bg-gray-100/10 dark:hover:bg-gray-900/20 transition-colors"
     >
       <div className="flex justify-between items-start gap-2">
         <div className="flex items-start gap-3">
-          <div className="flex flex-col items-center border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
+          <div className="flex flex-col items-center border border-border dark:border-gray-700/50 rounded-md overflow-hidden">
             <button
               onClick={handleVote}
-              className="flex items-center justify-center w-8 h-6 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700/50"
+              className="flex items-center justify-center w-8 h-6 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
             >
               <ChevronUp className="h-5 w-5" />
             </button>

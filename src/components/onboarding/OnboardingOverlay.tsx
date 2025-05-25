@@ -82,7 +82,11 @@ export const OnboardingOverlay = () => {
 
   // Handle success celebration when project is created
   useEffect(() => {
-    if (currentStepId === 'dashboard_tour') {
+    if (
+      currentStepId === 'dashboard_tour' &&
+      !localStorage.getItem('onboarding_skipped') &&
+      !localStorage.getItem('project_creation_skipped')
+    ) {
       console.log('[OnboardingOverlay] 🎉 Showing success celebration');
       setShowSuccessCelebration(true);
       setSuccessMessage({
@@ -121,6 +125,7 @@ export const OnboardingOverlay = () => {
               await setCurrentStep('create_project');
             }}
             onSkip={async () => {
+              localStorage.setItem('onboarding_skipped', 'true');
               await setStepCompleted('welcome', { skipped: true, timestamp: new Date().toISOString() });
               await completeOnboarding();
             }}
@@ -137,6 +142,7 @@ export const OnboardingOverlay = () => {
               createProjectButton?.click();
             }}
             onSkip={async () => {
+              localStorage.setItem('project_creation_skipped', 'true');
               await setStepCompleted('create_project', { skipped: true, timestamp: new Date().toISOString() });
               await completeOnboarding();
             }}

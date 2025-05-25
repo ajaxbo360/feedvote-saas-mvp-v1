@@ -59,6 +59,7 @@ export const WelcomeModal = ({ onStart, onSkip }: WelcomeModalProps) => {
 
   const handleSkip = async () => {
     try {
+      localStorage.setItem('onboarding_skipped', 'true');
       await skipOnboarding();
       setIsOpen(false);
       onSkip?.();

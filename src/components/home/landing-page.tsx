@@ -21,7 +21,19 @@ import { signInWithGoogle } from '@/utils/auth-helper';
 
 export function LandingPage() {
   const [showFloatingCTA, setShowFloatingCTA] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const { toast } = useToast();
+  const supabase = createClient();
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    checkUser();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -55,7 +67,7 @@ export function LandingPage() {
       <HomePageBackground />
 
       {/* Header */}
-      <Header user={null} />
+      <Header user={user} />
 
       {/* Leaderboard Button */}
       <LeaderboardButton />
@@ -80,12 +92,21 @@ export function LandingPage() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button
-                  className="h-11 gradient-button rounded-xl px-6 py-3 font-semibold text-sm shadow-md bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white"
-                  onClick={handleGoogleLogin}
-                >
-                  Get Started for free
-                </Button>
+                {user ? (
+                  <Button
+                    className="h-11 gradient-button rounded-xl px-6 py-3 font-semibold text-sm shadow-md bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white"
+                    asChild
+                  >
+                    <Link href="/app">Open Dashboard</Link>
+                  </Button>
+                ) : (
+                  <Button
+                    className="h-11 gradient-button rounded-xl px-6 py-3 font-semibold text-sm shadow-md bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white"
+                    onClick={handleGoogleLogin}
+                  >
+                    Get Started for free
+                  </Button>
+                )}
 
                 <div className="text-sm text-muted mt-2 sm:mt-4">
                   <span className="text-green-600 dark:text-green-400 font-medium">$0 forever</span> for the first 1000

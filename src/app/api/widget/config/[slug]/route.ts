@@ -1,14 +1,12 @@
 import { NextResponse } from 'next/server';
-import { createServerSupabaseClient } from '@/utils/supabase/server';
+import { createClient } from '@/utils/supabase/server';
+import { WidgetSettings, DEFAULT_WIDGET_SETTINGS } from '@/types/widget-settings';
 
 // Define the project type
 interface Project {
   id: string;
   name: string;
-  branding_colors: {
-    primary: string;
-    secondary: string;
-  } | null;
+  widget_settings: WidgetSettings;
 }
 
 // Default branding colors
@@ -19,12 +17,13 @@ const DEFAULT_COLORS = {
 
 export async function GET(request: Request, { params }: { params: { slug: string } }) {
   try {
-    const supabase = createServerSupabaseClient();
+    const supabase = await createClient();
+    const origin = request.headers.get('origin');
 
     // Query the projects table with the given slug
     const { data: project, error } = await supabase
       .from('projects')
-      .select('id, name, branding_colors')
+      .select('id, name, widget_settings')
       .eq('slug', params.slug)
       .single();
 
@@ -39,12 +38,40 @@ export async function GET(request: Request, { params }: { params: { slug: string
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
-    // Return project config with default colors if none are set
+    // Merge default settings with project settings
+    const settings: WidgetSettings = {
+      ...DEFAULT_WIDGET_SETTINGS,
+      ...project.widget_settings,
+    };
+
+    // Validate domain if whitelisted domains are set
+    if (settings.whitelistedDomains.length > 0 && origin) {
+      const domain = new URL(origin).hostname;
+      if (!settings.whitelistedDomains.some((d) => domain.endsWith(d))) {
+        return NextResponse.json({ error: 'Domain not allowed' }, { status: 403 });
+      }
+    }
+
+    // Return project config with settings
     return NextResponse.json({
       project_id: project.id,
       name: project.name,
-      branding: {
-        colors: project.branding_colors || DEFAULT_COLORS,
+      settings: {
+        appearance: {
+          primaryColor: settings.primaryColor,
+          secondaryColor: settings.secondaryColor,
+          position: settings.position,
+          theme: settings.theme,
+          buttonText: settings.buttonText,
+          customClass: settings.customClass,
+        },
+        userParameters: settings.userParameters,
+        allowAnonymous: settings.allowAnonymous,
+        analytics: settings.enableAnalytics
+          ? {
+              trackEvents: settings.trackEvents,
+            }
+          : null,
       },
     });
   } catch (error) {
