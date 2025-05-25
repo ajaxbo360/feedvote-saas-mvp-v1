@@ -577,17 +577,30 @@ export default function GeneralSettingsPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="slug">Project Slug</Label>
-                    <Input
-                      id="slug"
-                      name="slug"
-                      value={config.slug}
-                      onChange={handleConfigChange}
-                      placeholder="my-project"
-                    />
-                    <p className="text-sm text-muted-foreground">
-                      This will be used in your project's URL: feedvote.com/p/{config.slug}
-                    </p>
+                    <Label htmlFor="slug">Project URL</Label>
+                    <div className="space-y-2">
+                      <Input
+                        id="slug"
+                        name="slug"
+                        value={config.slug}
+                        disabled
+                        className="h-12 px-4 bg-muted font-mono text-sm"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Your project is available at:{' '}
+                        <a
+                          href={getProjectUrl(config.slug)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-medium text-primary hover:underline"
+                        >
+                          https://{config.slug}.feedvote.com/board
+                        </a>
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Project slugs cannot be changed after creation to maintain URL stability.
+                      </p>
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="metaDescription">Meta Description</Label>

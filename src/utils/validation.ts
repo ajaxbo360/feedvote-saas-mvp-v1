@@ -6,21 +6,63 @@
  * for user input to prevent injection attacks and data corruption
  */
 
+// List of reserved subdomains that should not be used as project slugs
+const RESERVED_SUBDOMAINS = ['www', 'app', 'api', 'admin', 'staging', 'dev', 'test', 'beta', 'docs'];
+
 export const validation = {
   /**
-   * Validates and sanitizes a slug string
+   * Validates and sanitizes a slug string for use as a subdomain
    * Allows lowercase letters, numbers, and hyphens
    * Replaces spaces with hyphens and removes other invalid characters
+   * Ensures the slug is valid as a subdomain
    */
   slug: (value: string): string => {
     if (!value) return '';
-    return value
+
+    // Convert to lowercase and trim
+    let slug = value
       .toLowerCase()
       .trim()
       .replace(/\s+/g, '-') // Replace spaces with hyphens
       .replace(/[^a-z0-9-]/g, '') // Remove invalid characters
       .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
       .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+
+    // Additional subdomain validation
+    if (slug.length > 63) {
+      slug = slug.slice(0, 63); // DNS labels must be 63 characters or less
+    }
+
+    // Check if it's a reserved subdomain
+    if (RESERVED_SUBDOMAINS.includes(slug)) {
+      return ''; // Return empty string for invalid slugs
+    }
+
+    return slug;
+  },
+
+  /**
+   * Checks if a slug is valid for use as a subdomain
+   */
+  isValidSlug: (slug: string): boolean => {
+    if (!slug || typeof slug !== 'string') return false;
+
+    // Must be between 3 and 63 characters
+    if (slug.length < 3 || slug.length > 63) return false;
+
+    // Must not be a reserved subdomain
+    if (RESERVED_SUBDOMAINS.includes(slug)) return false;
+
+    // Must start and end with alphanumeric characters
+    if (!/^[a-z0-9].*[a-z0-9]$/.test(slug)) return false;
+
+    // Must only contain lowercase letters, numbers, and hyphens
+    if (!/^[a-z0-9-]+$/.test(slug)) return false;
+
+    // Must not have consecutive hyphens
+    if (slug.includes('--')) return false;
+
+    return true;
   },
 
   /**

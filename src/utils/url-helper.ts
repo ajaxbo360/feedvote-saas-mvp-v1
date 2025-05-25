@@ -54,6 +54,44 @@ export function getBaseUrl(): string {
 }
 
 /**
+ * Gets the project URL based on the environment and project slug
+ * Handles both subdomain and path-based routing
+ */
+export function getProjectUrl(slug: string, path: string = '/board'): string {
+  // Client-side
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+    const isVercelPreview = hostname.includes('vercel.app');
+    const isStaging = hostname === 'staging.feedvote.com';
+
+    // For local development or preview environments, use path-based routing
+    if (isLocalhost || isVercelPreview || isStaging) {
+      return `${window.location.origin}/app/${slug}${path}`;
+    }
+
+    // For production, use subdomain-based routing
+    return `https://${slug}.feedvote.com${path}`;
+  }
+
+  // Server-side
+  if (process.env.NODE_ENV === 'development' || process.env.VERCEL_ENV === 'preview') {
+    const baseUrl = getBaseUrl();
+    return `${baseUrl}/app/${slug}${path}`;
+  }
+
+  return `https://${slug}.feedvote.com${path}`;
+}
+
+/**
+ * Gets the widget URL for a project
+ */
+export function getWidgetUrl(slug: string): string {
+  const baseUrl = getBaseUrl();
+  return `${baseUrl}/widget/${slug}`;
+}
+
+/**
  * Gets the redirect URL for authentication callbacks
  * Ensures the correct URL is used for the current environment
  */

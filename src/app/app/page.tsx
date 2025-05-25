@@ -431,10 +431,11 @@ const CreateProjectModal = ({
       return;
     }
 
-    if (!validation.minLength(slug, 3)) {
+    if (!validation.isValidSlug(slug)) {
       toast({
         title: 'Error',
-        description: 'Project slug must be at least 3 characters long',
+        description:
+          'Invalid project slug. It must be between 3 and 63 characters, use only lowercase letters, numbers, and hyphens, and cannot be a reserved name.',
         variant: 'destructive',
       });
       return;
@@ -478,7 +479,7 @@ const CreateProjectModal = ({
         .insert({
           name: projectName,
           slug: slug,
-          description: projectDescription, // Add the description field
+          description: projectDescription,
           user_id: user.id,
         })
         .select()
@@ -563,9 +564,15 @@ const CreateProjectModal = ({
                   Auto-generated from project name. You can edit it if needed.
                 </p>
               </div>
-              <p className="text-xs text-muted-foreground pl-1">
-                URL: https://feedvote.com/app/{slug || 'your-project-slug'}/board
-              </p>
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground pl-1">Your project will be available at:</p>
+                <p className="text-sm font-medium pl-1">https://{slug || 'your-project-slug'}.feedvote.com/board</p>
+                {!validation.isValidSlug(slug) && slug && (
+                  <p className="text-xs text-red-500 pl-1">
+                    Invalid slug. Use 3-63 lowercase letters, numbers, or hyphens. Cannot be a reserved name.
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>

@@ -5,6 +5,9 @@ import { apiRateLimiter } from '@/utils/rate-limiter';
 const API_ROUTES = ['/api'];
 const AUTH_ROUTES = ['/api/auth', '/auth/callback', '/auth/signout'];
 
+// List of reserved subdomains that should not be treated as project slugs
+const RESERVED_SUBDOMAINS = ['www', 'app', 'api', 'admin', 'staging', 'dev'];
+
 export async function middleware(request: NextRequest) {
   try {
     // Check if Supabase environment variables exist
@@ -59,6 +62,47 @@ export async function middleware(request: NextRequest) {
       }
     }
 
+    const url = request.nextUrl;
+    const hostname = request.headers.get('host') || '';
+
+    // Extract subdomain (handle both production and local development)
+    const subdomain = hostname.split('.')[0];
+    const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1');
+    const isCustomDomain = !hostname.includes('feedvote.com') && !isLocalhost;
+
+    // Skip middleware for static files and API routes
+    if (
+      url.pathname.startsWith('/_next') ||
+      url.pathname.startsWith('/static') ||
+      url.pathname.startsWith('/api') ||
+      url.pathname === '/favicon.ico'
+    ) {
+      return NextResponse.next();
+    }
+
+    // Handle custom domains (if implemented in the future)
+    if (isCustomDomain) {
+      // TODO: Implement custom domain handling
+      return NextResponse.next();
+    }
+
+    // Skip middleware for reserved subdomains
+    if (RESERVED_SUBDOMAINS.includes(subdomain)) {
+      return NextResponse.next();
+    }
+
+    // Handle project subdomains
+    if (hostname !== 'feedvote.com' && hostname !== 'www.feedvote.com' && !isLocalhost) {
+      // Rewrite the URL to the project route
+      const newUrl = new URL(`/app/${subdomain}${url.pathname}`, request.url);
+      return NextResponse.rewrite(newUrl);
+    }
+
+    // For localhost development, check if the URL starts with /app/
+    if (isLocalhost && url.pathname.startsWith('/app/')) {
+      return NextResponse.next();
+    }
+
     return response;
   } catch (error) {
     console.error('Middleware error:', error);
@@ -68,14 +112,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };
