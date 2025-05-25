@@ -272,48 +272,35 @@ export default function GeneralSettingsPage() {
     <>
       {/* Sticky Header */}
       <div className="fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-sm border-b z-50">
-        <div className="container max-w-5xl py-4 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 flex-1">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search settings..."
-                className="pl-9 w-full"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setConfig({
-                  apiSecret: 'sk_live_1234567890abcdef',
-                  logoUrl: 'https://placehold.co/120x40',
-                  name: 'Project Name',
-                  website: 'https://example.com',
-                  slug: 'project-slug',
-                  metaDescription: 'Meta description for SEO...',
-                  primaryColorLight: '#2563eb',
-                  primaryColorDark: '#60a5fa',
-                  hidePoweredBy: false,
-                });
-                toast({
-                  description: 'Settings reset to default values',
-                });
-              }}
-            >
-              Reset
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={saving}
-              className="bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white"
-            >
-              {saving ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </div>
+        <div className="container max-w-5xl py-4 flex items-center justify-end gap-4">
+          <Button
+            variant="outline"
+            onClick={() => {
+              setConfig({
+                apiSecret: 'sk_live_1234567890abcdef',
+                logoUrl: 'https://placehold.co/120x40',
+                name: 'Project Name',
+                website: 'https://example.com',
+                slug: 'project-slug',
+                metaDescription: 'Meta description for SEO...',
+                primaryColorLight: '#2563eb',
+                primaryColorDark: '#60a5fa',
+                hidePoweredBy: false,
+              });
+              toast({
+                description: 'Settings reset to default values',
+              });
+            }}
+          >
+            Reset
+          </Button>
+          <Button
+            onClick={handleSave}
+            disabled={saving}
+            className="bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white"
+          >
+            {saving ? 'Saving...' : 'Save Changes'}
+          </Button>
         </div>
       </div>
 
