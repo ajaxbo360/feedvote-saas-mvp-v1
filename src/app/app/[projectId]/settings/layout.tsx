@@ -44,30 +44,32 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
   const projectId = params.projectId;
 
   return (
-    <div className="container grid flex-1 gap-12 md:grid-cols-[200px_1fr] lg:grid-cols-[240px_1fr] py-8">
-      <aside className="hidden w-[200px] flex-col md:flex lg:w-[240px]">
-        <nav className="grid items-start gap-2">
-          {navItems.map((item) => {
-            const baseHref = `/app/${projectId}/settings${item.href}`;
-            const isActive = pathname === baseHref;
+    <div className="container py-8">
+      <div className="grid gap-12 md:grid-cols-[200px_1fr] lg:grid-cols-[240px_1fr]">
+        <aside className="hidden w-[200px] flex-col md:flex lg:w-[240px]">
+          <nav className="grid items-start gap-2">
+            {navItems.map((item) => {
+              const baseHref = `/app/${projectId}/settings${item.href}`;
+              const isActive = pathname === baseHref;
 
-            return (
-              <Link
-                key={item.href}
-                href={baseHref}
-                className={cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors',
-                  isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground',
-                )}
-              >
-                <item.icon className="h-4 w-4" />
-                <span>{item.title}</span>
-              </Link>
-            );
-          })}
-        </nav>
-      </aside>
-      <main className="flex w-full flex-1 flex-col overflow-hidden">{children}</main>
+              return (
+                <Link
+                  key={item.href}
+                  href={baseHref}
+                  className={cn(
+                    'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors',
+                    isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground',
+                  )}
+                >
+                  <item.icon className="h-4 w-4" />
+                  <span>{item.title}</span>
+                </Link>
+              );
+            })}
+          </nav>
+        </aside>
+        <main className="w-full">{children}</main>
+      </div>
     </div>
   );
 }

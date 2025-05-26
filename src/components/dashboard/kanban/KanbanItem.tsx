@@ -29,12 +29,12 @@ export function KanbanItem({ id, title, description, votes, onVote, onStatusChan
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
   };
 
   const handleVote = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    onVote?.(id);
   };
 
   const handleReject = () => {
@@ -47,42 +47,43 @@ export function KanbanItem({ id, title, description, votes, onVote, onStatusChan
       style={style}
       {...attributes}
       {...listeners}
-      className="[--tw-bg-opacity:0] bg-transparent dark:bg-gray-900 backdrop-blur-sm rounded-lg p-3 shadow-sm cursor-move border border-border dark:border-gray-700 hover:bg-gray-100/10 dark:hover:bg-gray-900/20 transition-colors"
+      className={`flex justify-between items-start gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 
+        shadow-sm transition-all duration-200 cursor-move
+        hover:border-green-500/50 hover:shadow-md hover:shadow-green-500/10
+        ${isDragging ? 'opacity-50' : ''}`}
     >
-      <div className="flex justify-between items-start gap-2">
-        <div className="flex items-start gap-3">
-          <div className="flex flex-col items-center border border-border dark:border-gray-700/50 rounded-md overflow-hidden">
-            <button
-              onClick={handleVote}
-              className="flex items-center justify-center w-8 h-6 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
-            >
-              <ChevronUp className="h-5 w-5" />
-            </button>
-            <div className="text-sm font-medium text-gray-900 dark:text-white w-full text-center py-0.5 bg-gray-50 dark:bg-gray-800">
-              {votes}
-            </div>
-          </div>
-          <div className="flex-1">
-            <h4 className="text-sm font-medium text-gray-900 dark:text-white">{title}</h4>
-            {description && <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{description}</p>}
+      <div className="flex items-start gap-3">
+        <div className="flex flex-col items-center border border-border dark:border-gray-700/50 rounded-md overflow-hidden">
+          <button
+            onClick={handleVote}
+            className="flex items-center justify-center w-8 h-6 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
+          >
+            <ChevronUp className="h-5 w-5" />
+          </button>
+          <div className="text-sm font-medium text-gray-900 dark:text-white w-full text-center py-0.5 bg-gray-50 dark:bg-gray-800">
+            {votes}
           </div>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleReject} className="text-red-600">
-              Reject
-            </DropdownMenuItem>
-            <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex-1">
+          <h4 className="text-sm font-medium text-gray-900 dark:text-white">{title}</h4>
+          {description && <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{description}</p>}
+        </div>
       </div>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem>Edit</DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleReject} className="text-red-600">
+            Reject
+          </DropdownMenuItem>
+          <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }

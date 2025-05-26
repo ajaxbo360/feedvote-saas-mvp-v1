@@ -4,6 +4,13 @@ import { createClient } from '@/utils/supabase/client';
 import { useEffect, useState } from 'react';
 import { redirect } from 'next/navigation';
 import { KanbanBoard } from '@/components/dashboard/kanban/KanbanBoard';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { ChevronDown } from 'lucide-react';
 
 interface PageProps {
   params: {
@@ -52,22 +59,27 @@ export default function RoadmapPage({ params }: PageProps) {
   }
 
   return (
-    <main className="flex flex-1 flex-col h-[calc(100vh-4rem)]">
+    <main className="flex flex-1 flex-col h-[calc(100vh-4rem)] overflow-auto">
       <div className="flex flex-col flex-1">
-        <div className="flex justify-between items-center p-8">
-          <h1 className="text-3xl font-bold">Roadmap</h1>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
+        <div className="w-full sticky top-0 bg-white dark:bg-gray-900 z-10">
+          <div className="flex justify-between items-center px-8 py-4">
+            <h1 className="text-2xl font-semibold">Roadmap</h1>
+            <div className="flex items-center gap-4">
               <span className="text-sm text-gray-500">Anonymous session</span>
+              <DropdownMenu>
+                <DropdownMenuTrigger className="flex items-center gap-2 px-3 py-1.5 text-sm border rounded-md hover:bg-gray-50 dark:hover:bg-gray-800">
+                  Sort by Votes <ChevronDown className="h-4 w-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem>Upvotes</DropdownMenuItem>
+                  <DropdownMenuItem>Release date</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
-            <select className="border rounded-md px-3 py-1.5 text-sm bg-white dark:bg-gray-800">
-              <option value="votes">Sort by Votes</option>
-              <option value="date">Sort by Date</option>
-            </select>
           </div>
         </div>
 
-        <div className="flex-1">
+        <div className="flex-1 pb-8">
           <KanbanBoard />
         </div>
       </div>
