@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabaseClient } from '@/utils/supabase/server';
-import { FeedbackSubmission } from '@/types/api';
+import { createClient } from '@/utils/supabase/server';
 import { z } from 'zod';
 
 const feedbackSchema = z.object({
@@ -13,7 +12,7 @@ const feedbackSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const supabase = createServerSupabaseClient();
+    const supabase = await createClient();
     const body = await request.json();
 
     // Validate required fields
@@ -22,11 +21,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
+    // Get project by slug
+    const { data: project, error: projectError } = await supabase
+      .from('projects')
+      .select('id')
+      .eq('slug', project_id)
+      .single();
+
+    if (projectError || !project) {
+      console.error('Error finding project:', projectError);
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+
     // Insert feedback into Supabase
     const { data, error } = await supabase
       .from('feedback')
       .insert({
-        project_id,
+        project_id: project.id,
         title,
         description,
         status: 'Open',

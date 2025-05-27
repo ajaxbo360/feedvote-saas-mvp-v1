@@ -117,11 +117,11 @@ export default function Home() {
           window.addEventListener('load', function() {
             if (typeof FeedVote !== 'undefined') {
               new FeedVote({
-                projectId: 'demo-project',
+                projectId: 'gamee',
                 position: 'bottom-right',
                 theme: 'light',
-                primaryColor: '#22c55e',
-                buttonText: 'Give Feedback',
+                primaryColor: '#2dd4bf',
+                buttonText: 'Share Feedback',
                 customClass: 'landing-widget'
               });
             }
