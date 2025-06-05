@@ -100,9 +100,7 @@ export function LandingPage() {
                   >
                     <Link href="/app">Open Dashboard</Link>
                   </Button>
-                ) : (
-                  <WaitlistForm />
-                )}
+                ) : null}
                 <div className="text-sm text-muted mt-2 sm:mt-4">
                   <span className="text-green-600 dark:text-green-400 font-medium">$0 forever</span> for the first 1000
                   customers
@@ -565,6 +563,13 @@ export function LandingPage() {
         {/* Pricing Section */}
         <FeedVotePricing />
 
+        {/* Place WaitlistForm before FAQ section */}
+        {!user && (
+          <section className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8 py-12 relative">
+            <WaitlistForm />
+          </section>
+        )}
+
         {/* FAQ Section */}
         <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16 relative">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-10 text-gray-900 dark:text-white">
@@ -660,6 +665,25 @@ function WaitlistForm() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (success) {
+      setShowSuccess(true);
+      const t = setTimeout(() => setShowSuccess(false), 20000);
+      setTimer(t);
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [success]);
+
+  const handleCloseSuccess = () => {
+    setShowSuccess(false);
+    setSuccess(false);
+    if (timer) clearTimeout(timer);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -677,7 +701,11 @@ function WaitlistForm() {
         setEmail('');
       } else {
         const data = await res.json();
-        setError(data.error || 'Something went wrong. Please try again.');
+        if (data.error && data.error.includes('already on the waitlist')) {
+          setError('This email is already on the waitlist!');
+        } else {
+          setError(data.error || 'Something went wrong. Please try again.');
+        }
       }
     } catch (err) {
       setError('Network error. Please try again.');
@@ -686,55 +714,63 @@ function WaitlistForm() {
     }
   };
 
-  if (success) {
-    return (
-      <div className="w-full bg-green-100 dark:bg-green-900 border border-green-300 dark:border-green-700 rounded-xl p-6 text-center">
-        <h3 className="text-xl font-semibold text-green-700 dark:text-green-300 mb-2">You're on the waitlist!</h3>
-        <p className="text-gray-700 dark:text-gray-200">
-          We'll email you when FeedVote launches. Thank you for your interest!
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="w-full bg-gradient-to-r from-green-500/10 to-blue-500/10 border border-green-500/20 rounded-xl p-6 flex flex-col gap-4 shadow-md"
-    >
-      <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Request Early Access</h3>
-      <p className="text-gray-700 dark:text-gray-300 mb-2">
-        Get exclusive early access to FeedVote and help shape the future of user feedback.
-      </p>
-      <div className="flex flex-col sm:flex-row gap-2 items-center">
-        <Input
-          type="email"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="flex-1 min-w-0"
-          disabled={loading}
-        />
-        <Button
-          type="submit"
-          className="h-11 gradient-button rounded-xl px-6 py-3 font-semibold text-sm shadow-md bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white"
-          disabled={loading}
-        >
-          {loading ? 'Joining...' : 'Join Waitlist'}
-        </Button>
-      </div>
-      {error && <div className="text-red-600 text-sm mt-1">{error}</div>}
-      <div className="mt-4">
-        <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Exclusive Benefits for Early Adopters</h4>
-        <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 text-sm space-y-1">
-          <li>Priority access to beta features</li>
-          <li>Direct feedback channel with our development team</li>
-          <li>Exclusive webinars and tutorials</li>
-          <li>Help shape the product direction</li>
-          <li>Special "Early Bird" badge and potential pricing benefits</li>
-        </ul>
-      </div>
-    </form>
+    <div>
+      {showSuccess && (
+        <div className="w-full bg-green-500 text-white border border-green-700 rounded-xl p-6 text-center font-semibold text-lg flex items-center justify-between mb-6 shadow-lg transition-all duration-300">
+          <div>
+            <span>You're on the waitlist!</span>
+            <div className="text-sm font-normal mt-1">
+              We'll email you when FeedVote launches. Thank you for your interest!
+            </div>
+          </div>
+          <button
+            onClick={handleCloseSuccess}
+            className="ml-4 text-white hover:text-green-200 text-2xl font-bold focus:outline-none"
+            aria-label="Close"
+          >
+            ×
+          </button>
+        </div>
+      )}
+      <form
+        onSubmit={handleSubmit}
+        className="w-full bg-gradient-to-r from-green-500/10 to-blue-500/10 border border-green-500/20 rounded-xl p-6 flex flex-col gap-4 shadow-md"
+      >
+        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Request Early Access</h3>
+        <p className="text-gray-700 dark:text-gray-300 mb-2">
+          Get exclusive early access to FeedVote and help shape the future of user feedback.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-2 items-center">
+          <Input
+            type="email"
+            placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="flex-1 min-w-0"
+            disabled={loading || showSuccess}
+          />
+          <Button
+            type="submit"
+            className="h-11 gradient-button rounded-xl px-6 py-3 font-semibold text-sm shadow-md bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white"
+            disabled={loading || showSuccess}
+          >
+            {loading ? 'Joining...' : 'Join Waitlist'}
+          </Button>
+        </div>
+        {error && <div className="text-red-600 text-sm mt-1">{error}</div>}
+        <div className="mt-4">
+          <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Exclusive Benefits for Early Adopters</h4>
+          <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 text-sm space-y-1">
+            <li>Priority access to beta features</li>
+            <li>Direct feedback channel with our development team</li>
+            <li>Exclusive webinars and tutorials</li>
+            <li>Help shape the product direction</li>
+            <li>Special "Early Bird" badge and potential pricing benefits</li>
+          </ul>
+        </div>
+      </form>
+    </div>
   );
 }

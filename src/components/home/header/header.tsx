@@ -55,22 +55,6 @@ export default function Header({ user: initialUser }: Props) {
         </div>
 
         <div className="hidden md:flex items-center space-x-8 mx-4">
-          {/* Product Hunt Badge now before links */}
-          <div>
-            <a
-              href="https://www.producthunt.com/posts/features-vote?utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-features-vote"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <img
-                src="https://s3.producthunt.com/static/badges/daily1.svg"
-                alt="Features.Vote - Build profitable features from user feedback | Product Hunt"
-                width="110"
-                height="30"
-              />
-            </a>
-          </div>
-
           <Link
             href="#features"
             className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
@@ -111,22 +95,6 @@ export default function Header({ user: initialUser }: Props) {
             </Button>
           )}
         </div>
-      </div>
-
-      {/* Mobile Product Hunt Badge - only shown on small screens */}
-      <div className="md:hidden flex justify-center pb-2">
-        <a
-          href="https://www.producthunt.com/posts/features-vote?utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-features-vote"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img
-            src="https://s3.producthunt.com/static/badges/daily1.svg"
-            alt="Features.Vote - Build profitable features from user feedback | Product Hunt"
-            width="110"
-            height="30"
-          />
-        </a>
       </div>
     </nav>
   );
