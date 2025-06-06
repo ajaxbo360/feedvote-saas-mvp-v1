@@ -5,13 +5,27 @@ import { ThemeToggle } from '@/components/ui/theme-toggle';
 import Image from 'next/image';
 import { useToast } from '@/components/ui/use-toast';
 import { signInWithGoogle } from '@/utils/auth-helper';
+import { createClient } from '@/utils/supabase/client';
+import { useEffect, useState } from 'react';
 
 interface Props {
   user: User | null;
 }
 
-export default function Header({ user }: Props) {
+export default function Header({ user: initialUser }: Props) {
   const { toast } = useToast();
+  const [user, setUser] = useState<User | null>(initialUser);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    checkUser();
+  }, []);
 
   const handleGoogleLogin = async () => {
     try {
@@ -41,22 +55,6 @@ export default function Header({ user }: Props) {
         </div>
 
         <div className="hidden md:flex items-center space-x-8 mx-4">
-          {/* Product Hunt Badge now before links */}
-          <div>
-            <a
-              href="https://www.producthunt.com/posts/features-vote?utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-features-vote"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <img
-                src="https://s3.producthunt.com/static/badges/daily1.svg"
-                alt="Features.Vote - Build profitable features from user feedback | Product Hunt"
-                width="110"
-                height="30"
-              />
-            </a>
-          </div>
-
           <Link
             href="#features"
             className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
@@ -84,9 +82,9 @@ export default function Header({ user }: Props) {
             <Button
               variant={'default'}
               asChild={true}
-              className="rounded-xl bg-green-600 hover:bg-green-700 text-white px-6"
+              className="h-11 gradient-button rounded-xl px-6 py-3 font-semibold text-sm shadow-md bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white"
             >
-              <Link href={'/dashboard'}>Dashboard</Link>
+              <Link href={'/app'}>Open Dashboard</Link>
             </Button>
           ) : (
             <Button
@@ -97,22 +95,6 @@ export default function Header({ user }: Props) {
             </Button>
           )}
         </div>
-      </div>
-
-      {/* Mobile Product Hunt Badge - only shown on small screens */}
-      <div className="md:hidden flex justify-center pb-2">
-        <a
-          href="https://www.producthunt.com/posts/features-vote?utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-features-vote"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img
-            src="https://s3.producthunt.com/static/badges/daily1.svg"
-            alt="Features.Vote - Build profitable features from user feedback | Product Hunt"
-            width="110"
-            height="30"
-          />
-        </a>
       </div>
     </nav>
   );
