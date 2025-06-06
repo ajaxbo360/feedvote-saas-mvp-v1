@@ -35,6 +35,18 @@ export function GoogleLoginButton({ label }: Props) {
       const redirectUrl = getAuthRedirectUrl();
       console.log('Auth Redirect URL:', redirectUrl);
 
+      // Clear any previous PKCE state from localStorage to ensure a fresh auth flow
+      if (typeof window !== 'undefined') {
+        const localStorageKeys = Object.keys(localStorage);
+        const supabasePkceKeys = localStorageKeys.filter(
+          (key) => key.startsWith('supabase.auth.token') || key.includes('code_verifier'),
+        );
+
+        console.log('Clearing previous PKCE state:', supabasePkceKeys);
+        // Don't actually clear them as it might break existing sessions
+        // Just log them for debugging
+      }
+
       console.log('=========================');
 
       const supabase = createClient();
@@ -44,9 +56,13 @@ export function GoogleLoginButton({ label }: Props) {
         provider: 'google',
         options: {
           redirectTo: redirectUrl,
+          skipBrowserRedirect: false, // Ensure browser is redirected
           queryParams: {
             // Add a timestamp to prevent caching issues
             _t: new Date().getTime().toString(),
+            // Include these params for Google OAuth
+            prompt: 'select_account',
+            access_type: 'offline',
           },
         },
       });
@@ -60,6 +76,10 @@ export function GoogleLoginButton({ label }: Props) {
         });
       } else {
         console.log('OAuth successful, redirecting to:', data?.url);
+        // For PKCE to work correctly, we need to actually navigate to the URL
+        if (data?.url) {
+          window.location.href = data.url;
+        }
       }
     } catch (err) {
       console.error('Unexpected error during authentication:', err);

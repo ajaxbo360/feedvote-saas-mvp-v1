@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Widget Test Page</title>
+    <style>
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        line-height: 1.5;
+        margin: 0;
+        padding: 20px;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      h1 {
+        color: #333;
+      }
+      .content {
+        background: #f9fafb;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Widget Test Page</h1>
+      <div class="content">
+        <h2>About This Project</h2>
+        <p>
+          This is a test page to demonstrate the feedback widget integration. The widget should appear in the
+          bottom-right corner.
+        </p>
+        <p>Try clicking the feedback button and submitting some test feedback!</p>
+      </div>
+    </div>
+
+    <!-- Widget Integration -->
+    <script
+      src="/widget/widget.js"
+      slug="gamee"
+      user_id="test_user_123"
+      user_email="test@example.com"
+      user_name="Test User"
+    ></script>
+  </body>
+</html>
