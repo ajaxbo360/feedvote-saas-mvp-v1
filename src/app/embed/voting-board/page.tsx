@@ -11,6 +11,7 @@ interface FeedbackItem {
   votes: number;
   status: string;
   created_at: string;
+  project_id: string;
 }
 
 export default function VotingBoardEmbed() {

@@ -17,8 +17,5 @@
   "github": {
     "enabled": true,
     "silent": false
-  },
-  "build": {
-    "ignoreCommand": "if [ \"$VERCEL_GIT_BRANCH\" = \"develop\" ]; then exit 1; fi"
   }
 }

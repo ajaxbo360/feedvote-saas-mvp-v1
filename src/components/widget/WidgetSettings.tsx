@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { WidgetSettings as IWidgetSettings, DEFAULT_WIDGET_SETTINGS } from '@/types/widget-settings';
-import { createClientSupabaseClient } from '@/utils/supabase/client';
+import { createClient } from '@/utils/supabase/client';
 
 interface WidgetSettingsProps {
   projectId: string;
@@ -17,7 +17,7 @@ interface WidgetSettingsProps {
 export function WidgetSettings({ projectId }: WidgetSettingsProps) {
   const [settings, setSettings] = useState<IWidgetSettings>(DEFAULT_WIDGET_SETTINGS);
   const [isSaving, setIsSaving] = useState(false);
-  const supabase = createClientSupabaseClient();
+  const supabase = createClient();
 
   useEffect(() => {
     loadSettings();
