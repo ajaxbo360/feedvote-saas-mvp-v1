@@ -32,6 +32,8 @@ import { getCsrfHeader } from '@/utils/csrf-protection';
 import { AppHeader } from '@/components/app/app-header';
 import { useOnboarding } from '@/providers/OnboardingProvider';
 
+export const dynamic = 'force-dynamic';
+
 // Project Interface
 interface Project {
   id: string;

@@ -6,6 +6,8 @@ import { createClient } from '@/utils/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useRouter } from 'next/navigation';
 
+export const dynamic = 'force-dynamic';
+
 export default function ResetOnboardingPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');

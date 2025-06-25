@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { supabase } from '@/lib/supabase';
 
 interface FeedbackItem {
@@ -14,7 +14,7 @@ interface FeedbackItem {
   project_id: string;
 }
 
-export default function VotingBoardEmbed() {
+function VotingBoardContent() {
   const searchParams = useSearchParams();
   const [feedback, setFeedback] = useState<FeedbackItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -127,5 +127,19 @@ export default function VotingBoardEmbed() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function VotingBoardEmbed() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-teal-500"></div>
+        </div>
+      }
+    >
+      <VotingBoardContent />
+    </Suspense>
   );
 }
