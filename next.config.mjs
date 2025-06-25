@@ -1,12 +1,14 @@
 /** @type {import('next').NextConfig} */
+const baseExperimental = {
+  forceSwcTransforms: true,
+};
+
 const nextConfig = {
   // Enable SWC compiler
   swcMinify: true,
 
   // Disable Babel
-  experimental: {
-    forceSwcTransforms: true,
-  },
+  experimental: baseExperimental,
 
   images: {
     domains: ['cdn.simpleicons.org', 'localhost', 'paddle-billing.vercel.app'],
@@ -71,15 +73,15 @@ const nextConfig = {
 
   // Configure static export behavior
   trailingSlash: false,
-
-  // Don't fail build on static generation errors in CI
-  ...(process.env.CI && {
-    experimental: {
-      ...nextConfig.experimental,
-      // Allow static generation to continue even with errors
-      allowMiddlewareResponseBody: true,
-    },
-  }),
 };
+
+// Add CI-specific configuration if in CI environment
+if (process.env.CI) {
+  nextConfig.experimental = {
+    ...baseExperimental,
+    // Allow static generation to continue even with errors
+    allowMiddlewareResponseBody: true,
+  };
+}
 
 export default nextConfig;
