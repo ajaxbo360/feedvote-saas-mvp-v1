@@ -11,6 +11,7 @@ interface FeedbackItem {
   votes: number;
   status: string;
   created_at: string;
+  project_id: string;
 }
 
 export default function VotingBoardEmbed() {
@@ -46,7 +47,7 @@ export default function VotingBoardEmbed() {
         // Then fetch feedback for this project
         const { data: feedbackData, error: feedbackError } = await supabase
           .from('feedback')
-          .select('*')
+          .select('id, title, description, votes, status, created_at, project_id')
           .eq('project_id', projectData.id)
           .order('votes', { ascending: false })
           .order('created_at', { ascending: false });

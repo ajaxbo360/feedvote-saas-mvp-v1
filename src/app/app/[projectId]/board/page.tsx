@@ -196,7 +196,7 @@ export default function BoardPage({ params }: PageProps) {
                         request.status === 'in_progress'
                           ? 'default'
                           : request.status === 'approved'
-                            ? 'success'
+                            ? 'outline'
                             : 'secondary'
                       }
                       className="capitalize"
