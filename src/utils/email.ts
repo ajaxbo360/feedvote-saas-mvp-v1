@@ -1,8 +1,16 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function sendWaitlistConfirmationEmail(email: string) {
+  // Initialize Resend only when needed and handle missing API key
+  const apiKey = process.env.RESEND_API_KEY;
+
+  if (!apiKey) {
+    console.warn('RESEND_API_KEY environment variable is not set. Email will not be sent.');
+    return { error: 'Email service not configured' };
+  }
+
+  const resend = new Resend(apiKey);
+
   return resend.emails.send({
     from: 'FeedVote <no-reply@feedvote.com>',
     to: email,
