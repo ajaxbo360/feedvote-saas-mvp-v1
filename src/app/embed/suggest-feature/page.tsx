@@ -1,14 +1,14 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 
 interface FormData {
   title: string;
   description: string;
 }
 
-export default function SuggestFeatureEmbed() {
+function SuggestFeatureContent() {
   const searchParams = useSearchParams();
   const [formData, setFormData] = useState<FormData>({ title: '', description: '' });
   const [loading, setLoading] = useState(false);
@@ -123,5 +123,19 @@ export default function SuggestFeatureEmbed() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function SuggestFeatureEmbed() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-teal-500"></div>
+        </div>
+      }
+    >
+      <SuggestFeatureContent />
+    </Suspense>
   );
 }

@@ -4,6 +4,8 @@ import OnboardingDebugger from '@/components/debug/OnboardingDebugger';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 export default function DebugPage() {
   return (
     <div className="p-4">

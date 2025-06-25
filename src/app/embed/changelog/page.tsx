@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { supabase } from '@/lib/supabase';
 
 interface ChangelogItem {
@@ -12,7 +12,7 @@ interface ChangelogItem {
   version: string;
 }
 
-export default function ChangelogEmbed() {
+function ChangelogContent() {
   const searchParams = useSearchParams();
   const [changelog, setChangelog] = useState<ChangelogItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -115,5 +115,19 @@ export default function ChangelogEmbed() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ChangelogEmbed() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-teal-500"></div>
+        </div>
+      }
+    >
+      <ChangelogContent />
+    </Suspense>
   );
 }
