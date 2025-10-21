@@ -13,16 +13,16 @@ export function getEnvironmentSpecificSupabaseUrl(): string {
 
     // Staging environment
     if (hostname === 'staging.feedvote.com' || hostname.includes('vercel.app')) {
-      return 'https://cnftvsflgsjvobubzxcj.supabase.co';
+      return 'https://rgymwojpogscitqgfkgo.supabase.co';
     }
 
     // Production environment
     if (hostname === 'feedvote.com' || hostname === 'www.feedvote.com') {
-      return 'https://xtgbskvaurrczvbzticy.supabase.co';
+      return 'https://rgymwojpogscitqgfkgo.supabase.co';
     }
 
     // Local development - use staging by default to avoid messing with prod data
-    return 'https://cnftvsflgsjvobubzxcj.supabase.co';
+    return 'https://rgymwojpogscitqgfkgo.supabase.co';
   }
 
   // Server-side - use environment variables
