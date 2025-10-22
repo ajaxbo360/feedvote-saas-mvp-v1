@@ -10,7 +10,7 @@ echo -e "${YELLOW}Pushing migrations to Supabase staging...${NC}"
 
 # Link to the project
 echo -e "${YELLOW}Linking to project...${NC}"
-supabase link --project-ref cnftvsflgsjvobubzxcj
+supabase link --project-ref rgymwojpogscitqgfkgo
 
 if [ $? -ne 0 ]; then
   echo -e "${RED}Failed to link to project.${NC}"
