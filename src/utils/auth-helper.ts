@@ -5,6 +5,7 @@ import { getAuthRedirectUrl } from './url-helper';
 
 // Storage keys
 const USER_PROFILE_CACHE_KEY = 'feedvote-user-profile';
+const redirectUrl = `${window.location.origin}/auth/callback`;
 
 // Store user profile data in localStorage (non-sensitive data only)
 export const storeUserProfileCache = (user: any) => {
@@ -58,11 +59,10 @@ export const clearUserProfileCache = () => {
 // Sign in with Google
 export const signInWithGoogle = async () => {
   const supabase = createClient();
-  const redirectUrl = `${window.location.origin}/auth/callback`;
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: redirectUrl,
+      redirectTo: getAuthRedirectUrl(),
     },
   });
 
