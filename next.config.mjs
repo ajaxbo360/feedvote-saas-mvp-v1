@@ -80,7 +80,7 @@ if (process.env.CI) {
   nextConfig.experimental = {
     ...baseExperimental,
     // Allow static generation to continue even with errors
-    allowMiddlewareResponseBody: true,
+    //allowMiddlewareResponseBody: true,
   };
 }
 
