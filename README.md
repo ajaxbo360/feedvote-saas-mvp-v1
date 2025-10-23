@@ -9,6 +9,7 @@ A modern SaaS landing page and subscription management platform built with Next.
 - User management and authentication system
 - Ready-made screens for customer subscription management
 - Automatic syncing of customer and subscription data using webhooks
+- Test update for staging deployment
 
 ## Stack
 
