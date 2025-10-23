@@ -18,7 +18,7 @@ export function getEnvironmentSpecificSupabaseUrl(): string {
 
     // Production environment
     if (hostname === 'feedvote.com' || hostname === 'www.feedvote.com') {
-      return 'https://rgymwojpogscitqgfkgo.supabase.co';
+      return 'https://rgutipakftnwitzafswt.supabase.co';
     }
 
     // Local development - use staging by default to avoid messing with prod data
