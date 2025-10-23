@@ -1,0 +1,22 @@
+{
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next",
+      "config": {
+        "installCommand": "npm install --no-frozen-lockfile && npm install @radix-ui/react-avatar @radix-ui/react-progress @radix-ui/react-switch @radix-ui/react-tooltip"
+      }
+    }
+  ],
+  "buildCommand": "npm run build",
+  "framework": "nextjs",
+  "devCommand": "npm run dev",
+  "env": {
+    "ENVIRONMENT": "preview"
+  },
+  "github": {
+    "enabled": true,
+    "silent": false,
+    "autoAlias": true
+  }
+}

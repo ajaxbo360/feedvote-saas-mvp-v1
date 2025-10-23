@@ -11,11 +11,15 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.next();
   }
 
-  let supabaseResponse = NextResponse.next({
-    request,
-  });
-
   try {
+    // Create a response that we'll use to set cookies on
+    let supabaseResponse = NextResponse.next({
+      request: {
+        headers: request.headers,
+      },
+    });
+
+    // Create supabase client
     const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
       cookies: {
         getAll() {
@@ -23,33 +27,19 @@ export async function updateSession(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-          supabaseResponse = NextResponse.next({
-            request,
+          cookiesToSet.forEach(({ name, value, options }) => {
+            supabaseResponse.cookies.set(name, value, options);
           });
-          cookiesToSet.forEach(({ name, value, options }) => supabaseResponse.cookies.set(name, value, options));
         },
       },
     });
 
-    // Do not run code between createServerClient and
+    // IMPORTANT: Do not run code between createServerClient and
     // supabase.auth.getUser(). A simple mistake could make it very hard to debug
     // issues with users being randomly logged out.
 
-    // IMPORTANT: DO NOT REMOVE auth.getUser()
+    // Get user data and refresh session if needed
     await supabase.auth.getUser();
-
-    // IMPORTANT: You *must* return the supabaseResponse object as it is.
-    // If you're creating a new response object with NextResponse.next() make sure to:
-    // 1. Pass the request in it, like so:
-    //    const myNewResponse = NextResponse.next({ request })
-    // 2. Copy over the cookies, like so:
-    //    myNewResponse.cookies.setAll(supabaseResponse.cookies.getAll())
-    // 3. Change the myNewResponse object to fit your needs, but avoid changing
-    //    the cookies!
-    // 4. Finally:
-    //    return myNewResponse
-    // If this is not done, you may be causing the browser and server to go out
-    // of sync and terminate the user's session prematurely!
 
     return supabaseResponse;
   } catch (error) {

@@ -1,0 +1,32 @@
+name: 'Database Tests'
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start Supabase local development
+        run: supabase db start
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Verify database schema
+        run: |
+          # Generate a report of the database schema
+          supabase db diff --schema public > schema-report.sql
+          echo "Database Schema Report:"
+          cat schema-report.sql
+
+      # Uncomment if you have pgTAP tests
+      # - name: Run database tests
+      #   run: supabase test db

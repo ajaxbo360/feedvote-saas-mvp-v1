@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { createClient } from '@/utils/supabase/client';
+import { getAuthRedirectUrl } from '@/utils/url-helper';
 
 export function SignupForm() {
   const { toast } = useToast();
@@ -13,7 +14,7 @@ export function SignupForm() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: getAuthRedirectUrl(),
         },
       });
 

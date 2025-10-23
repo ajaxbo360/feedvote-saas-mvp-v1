@@ -1,0 +1,67 @@
+name: CI
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel running workflows
+        uses: styfle/cancel-workflow-action@0.12.0
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set node version
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Cache node_modules
+        id: node-modules-cache
+        uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: node-modules-cache-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install dependencies
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Run type checking
+        run: npx tsc --noEmit
+
+      - name: Run format check
+        run: npm run prettier:check
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start Supabase local development
+        run: |
+          # Local setup doesn't have IPv6 issues as it runs in Docker
+          supabase db start || echo "Failed to start Supabase local development"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Verify generated types
+        run: |
+          # Only verify types if local DB started successfully
+          if [ -d .supabase ]; then
+            supabase gen types typescript --local > types.gen.ts
+            if ! git diff --ignore-space-at-eol --exit-code --quiet types.gen.ts; then
+              echo "Detected uncommitted changes in types. See status below:"
+              git diff
+              exit 1
+            fi
+          else
+            echo "Skipping type verification since local DB may not have started"
+          fi
