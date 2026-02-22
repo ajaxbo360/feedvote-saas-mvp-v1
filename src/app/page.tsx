@@ -116,8 +116,9 @@ export default function Home() {
           __html: `
           window.addEventListener('load', function() {
             if (typeof FeedVote !== 'undefined') {
+              console.log('Initializing FeedVote widget with projectId: calai2');
               new FeedVote({
-                projectId: 'gamee',
+                projectId: 'calai2',
                 position: 'bottom-right',
                 theme: 'light',
                 primaryColor: '#2dd4bf',

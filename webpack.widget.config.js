@@ -2,6 +2,11 @@ const path = require('path');
 const TerserPlugin = require('terser-webpack-plugin');
 const webpack = require('webpack');
 
+const fs = require('fs');
+const Dotenv = require('dotenv-webpack');
+
+const envPath = fs.existsSync('./.env.local') ? './.env.local' : './.env';
+
 module.exports = {
   mode: process.env.NODE_ENV || 'production',
   entry: './src/widget/feedvote.js',
@@ -24,8 +29,9 @@ module.exports = {
     ],
   },
   plugins: [
-    new webpack.DefinePlugin({
-      'process.env.NEXT_PUBLIC_API_URL': JSON.stringify(process.env.NEXT_PUBLIC_API_URL),
+    new Dotenv({
+      path: envPath,
+      systemvars: true, // Load system variables as well (useful for CI/CD)
     }),
   ],
   module: {

@@ -2,8 +2,15 @@ import '@testing-library/jest-dom';
 
 // Mock Next.js Request and Response
 global.Request = class {
-  constructor(url) {
+  constructor(url, init = {}) {
     this.url = url;
+    this.method = init.method || 'GET';
+    this.body = init.body;
+    this.headers = new Headers(init.headers);
+  }
+
+  async json() {
+    return typeof this.body === 'string' ? JSON.parse(this.body) : this.body;
   }
 };
 

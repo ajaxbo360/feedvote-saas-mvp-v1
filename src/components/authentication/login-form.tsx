@@ -3,13 +3,27 @@
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
+import { signInWithGoogle } from '@/utils/auth-helper';
 
 export function LoginForm() {
   const { toast } = useToast();
 
-  function handleGoogleLogin() {
-    // This will be implemented with Supabase Google OAuth
-    toast({ description: 'Google login will be implemented with Supabase' });
+  async function handleGoogleLogin() {
+    try {
+      const { error } = await signInWithGoogle();
+
+      if (error) {
+        toast({
+          description: `Authentication error: ${error.message}`,
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      toast({
+        description: 'Failed to connect to authentication service',
+        variant: 'destructive',
+      });
+    }
   }
 
   return (

@@ -3,7 +3,7 @@
 import { useParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { Settings, Key, Globe, Palette, BellRing, Users } from 'lucide-react';
+import { Settings, Key, Globe, Palette, BellRing, Users, CreditCard } from 'lucide-react';
 
 const navItems = [
   {
@@ -35,6 +35,11 @@ const navItems = [
     title: 'Team',
     href: '/team',
     icon: Users,
+  },
+  {
+    title: 'Billing',
+    href: '/billing',
+    icon: CreditCard,
   },
 ];
 

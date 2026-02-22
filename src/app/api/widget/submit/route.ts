@@ -10,7 +10,24 @@ const feedbackSchema = z.object({
   attachment_url: z.string().url('Invalid attachment URL').optional(),
 });
 
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  });
+}
+
 export async function POST(request: Request) {
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  };
+
   try {
     const supabase = await createClient();
     const body = await request.json();
@@ -18,7 +35,7 @@ export async function POST(request: Request) {
     // Validate required fields
     const { project_id, title, description } = body;
     if (!project_id || !title || !description) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400, headers: corsHeaders });
     }
 
     // Get project by slug
@@ -30,7 +47,7 @@ export async function POST(request: Request) {
 
     if (projectError || !project) {
       console.error('Error finding project:', projectError);
-      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Project not found' }, { status: 404, headers: corsHeaders });
     }
 
     // Insert feedback into Supabase
@@ -48,12 +65,12 @@ export async function POST(request: Request) {
 
     if (error) {
       console.error('Error submitting feedback:', error);
-      return NextResponse.json({ error: 'Failed to submit feedback' }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to submit feedback' }, { status: 500, headers: corsHeaders });
     }
 
-    return NextResponse.json(data);
+    return NextResponse.json(data, { status: 201, headers: corsHeaders });
   } catch (error) {
     console.error('Error in feedback submission:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500, headers: corsHeaders });
   }
 }

@@ -4,14 +4,34 @@ import { z } from 'zod';
 
 const projectIdSchema = z.string().min(1, 'Project ID is required');
 
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  });
+}
+
 export async function GET(req: NextRequest, { params }: { params: { projectId: string } }) {
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  };
+
   try {
     const projectId = params.projectId;
 
     // Validate project ID
     const validationResult = projectIdSchema.safeParse(projectId);
     if (!validationResult.success) {
-      return NextResponse.json({ error: validationResult.error.issues[0].message }, { status: 400 });
+      return NextResponse.json(
+        { error: validationResult.error.issues[0].message },
+        { status: 400, headers: corsHeaders },
+      );
     }
 
     // Fetch feedback items for the project
@@ -24,12 +44,12 @@ export async function GET(req: NextRequest, { params }: { params: { projectId: s
 
     if (error) {
       console.error('Error fetching feedback:', error);
-      return NextResponse.json({ error: 'Failed to fetch feedback' }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to fetch feedback' }, { status: 500, headers: corsHeaders });
     }
 
-    return NextResponse.json({ data });
+    return NextResponse.json({ data }, { headers: corsHeaders });
   } catch (error) {
     console.error('Error processing feedback request:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500, headers: corsHeaders });
   }
 }

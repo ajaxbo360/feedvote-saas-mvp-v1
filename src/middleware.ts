@@ -5,47 +5,110 @@ import { apiRateLimiter } from '@/utils/rate-limiter';
 const API_ROUTES = ['/api'];
 const AUTH_ROUTES = ['/api/auth', '/auth/callback', '/auth/signout'];
 
+// Public routes that should NEVER require authentication
+// These pages are accessible to everyone, including incognito/private browsing
+const PUBLIC_ROUTES = ['/', '/login', '/signup', '/pricing', '/products', '/demo', '/embed'];
+
 // List of reserved subdomains that should not be treated as project slugs
 const RESERVED_SUBDOMAINS = ['www', 'app', 'api', 'admin', 'staging', 'dev'];
 
+/**
+ * Check if a pathname matches a public route.
+ * Exact match for '/' and prefix match for others.
+ */
+function isPublicRoute(pathname: string): boolean {
+  if (pathname === '/') return true;
+  return PUBLIC_ROUTES.some((route) => route !== '/' && pathname.startsWith(route));
+}
+
 export async function middleware(request: NextRequest) {
   try {
-    // Check if Supabase environment variables exist
+    const url = request.nextUrl;
+    const pathname = url.pathname;
+
+    // 1. Skip middleware entirely for static files and favicon
+    if (pathname.startsWith('/_next') || pathname.startsWith('/static') || pathname === '/favicon.ico') {
+      return NextResponse.next();
+    }
+
+    // 2. Check if Supabase environment variables exist
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
       console.warn('Supabase environment variables missing, skipping auth middleware');
       return NextResponse.next();
     }
 
-    // Apply rate limiting for API routes
-    if (API_ROUTES.some((route) => request.nextUrl.pathname.startsWith(route))) {
+    // 3. Apply rate limiting for API routes
+    if (API_ROUTES.some((route) => pathname.startsWith(route))) {
       const rateLimitResponse = apiRateLimiter(request);
       if (rateLimitResponse) {
         return rateLimitResponse; // Return 429 Too Many Requests
       }
-    }
-
-    // Special handling for auth callback route - always allow
-    if (request.nextUrl.pathname.startsWith('/auth/callback')) {
+      // API routes don't need session updates or auth checks here
       return NextResponse.next();
     }
 
-    // Update the session (this will handle auth token refresh via cookies)
-    const response = await updateSession(request);
+    // 4. Always allow auth callback route
+    if (pathname.startsWith('/auth/callback')) {
+      return NextResponse.next();
+    }
 
-    // Check if it's a protected route
-    const isProtectedRoute = request.nextUrl.pathname.startsWith('/app');
+    // 5. Handle subdomain logic early (before any auth processing)
+    const hostname = request.headers.get('host') || '';
+    const subdomain = hostname.split('.')[0];
+    const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1');
+    const isCustomDomain = !hostname.includes('feedvote.com') && !isLocalhost;
+
+    // Handle custom domains
+    if (isCustomDomain) {
+      return NextResponse.next();
+    }
+
+    // Skip auth for reserved subdomains (www, staging, etc.) on non-protected routes
+    // Note: reserved subdomains should still protect /app/* routes
+    const isReservedSubdomain = RESERVED_SUBDOMAINS.includes(subdomain);
+
+    // Handle project subdomains (non-reserved, non-localhost)
+    if (!isReservedSubdomain && hostname !== 'feedvote.com' && !isLocalhost) {
+      // Rewrite the URL to the project route
+      const newUrl = new URL(`/app/${subdomain}${pathname}`, request.url);
+      return NextResponse.rewrite(newUrl);
+    }
+
+    // 6. For PUBLIC routes — allow access WITHOUT any auth processing
+    //    This is critical for incognito/private browsing to work
+    if (isPublicRoute(pathname)) {
+      // Still update session IF cookies exist (so logged-in users get refreshed tokens)
+      // But don't block or redirect — just pass through
+      try {
+        const response = await updateSession(request);
+        return response;
+      } catch {
+        // If session update fails (e.g., no cookies in incognito), just continue
+        return NextResponse.next();
+      }
+    }
+
+    // 7. For PROTECTED routes (/app/*) — require authentication
+    const isProtectedRoute = pathname.startsWith('/app');
 
     if (isProtectedRoute) {
+      // Try to update session first
+      let response: NextResponse;
+      try {
+        response = await updateSession(request);
+      } catch {
+        // Session update failed — redirect to homepage
+        const redirectUrl = new URL('/', request.url);
+        return NextResponse.redirect(redirectUrl);
+      }
+
       const allCookies = request.cookies.getAll();
       const cookieNames = allCookies.map((c) => c.name);
 
-      // Check for Supabase auth cookies with pattern matching
-      // Supabase prefixes cookies with the project ID and may add indices
+      // Check for Supabase auth cookies
       const hasAuthCookie = cookieNames.some((name) => {
         return (
-          // Check for any cookie containing 'auth-token' pattern
           name.includes('auth-token') ||
-          // Check for other common Supabase auth cookie patterns
           name.includes('refresh-token') ||
           name.startsWith('sb-') ||
           name.includes('supabase')
@@ -57,53 +120,19 @@ export async function middleware(request: NextRequest) {
       const hasAuthHeader = authHeader.length > 0;
 
       if (!hasAuthCookie && !hasAuthHeader) {
-        const redirectUrl = new URL('/', request.url);
+        const redirectUrl = new URL('/login', request.url);
         return NextResponse.redirect(redirectUrl);
       }
+
+      return response;
     }
 
-    const url = request.nextUrl;
-    const hostname = request.headers.get('host') || '';
-
-    // Extract subdomain (handle both production and local development)
-    const subdomain = hostname.split('.')[0];
-    const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1');
-    const isCustomDomain = !hostname.includes('feedvote.com') && !isLocalhost;
-
-    // Skip middleware for static files and API routes
-    if (
-      url.pathname.startsWith('/_next') ||
-      url.pathname.startsWith('/static') ||
-      url.pathname.startsWith('/api') ||
-      url.pathname === '/favicon.ico'
-    ) {
+    // 8. For any other routes — allow access
+    try {
+      return await updateSession(request);
+    } catch {
       return NextResponse.next();
     }
-
-    // Handle custom domains (if implemented in the future)
-    if (isCustomDomain) {
-      // TODO: Implement custom domain handling
-      return NextResponse.next();
-    }
-
-    // Skip middleware for reserved subdomains
-    if (RESERVED_SUBDOMAINS.includes(subdomain)) {
-      return NextResponse.next();
-    }
-
-    // Handle project subdomains
-    if (hostname !== 'feedvote.com' && hostname !== 'www.feedvote.com' && !isLocalhost) {
-      // Rewrite the URL to the project route
-      const newUrl = new URL(`/app/${subdomain}${url.pathname}`, request.url);
-      return NextResponse.rewrite(newUrl);
-    }
-
-    // For localhost development, check if the URL starts with /app/
-    if (isLocalhost && url.pathname.startsWith('/app/')) {
-      return NextResponse.next();
-    }
-
-    return response;
   } catch (error) {
     console.error('Middleware error:', error);
     // Always allow the request to continue in case of errors
@@ -112,5 +141,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 };
